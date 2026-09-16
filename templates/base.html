@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Household Expense Tracker{% endblock %}</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet"><link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet"></head>
+<body><nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4"><div class="container">
+<a class="navbar-brand" href="{{ url_for('index') }}">🏠 Household Expenses</a>
+{% if current_username %}<div class="d-flex align-items-center gap-2 flex-wrap justify-content-end"><span class="navbar-text text-white">Hello, <strong>{{ current_username }}</strong></span><a class="btn btn-outline-light btn-sm" href="{{ url_for('index') }}">Today</a><a class="btn btn-outline-light btn-sm" href="{{ url_for('month_view') }}">Month-wise Expenses</a><a class="btn btn-outline-light btn-sm" href="{{ url_for('account_email') }}">Account</a><form method="POST" action="{{ url_for('logout') }}"><button class="btn btn-light btn-sm">Sign out</button></form></div>{% endif %}
+</div></nav><div class="container pb-5">
+{% with messages = get_flashed_messages(with_categories=true) %}{% for category, message in messages %}<div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>{% endfor %}{% endwith %}
+{% block content %}{% endblock %}</div><script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script></body></html>

@@ -1,0 +1,24 @@
+Traceback (most recent call last):
+  File "D:\Java_programs\household-expenses\serve.py", line 9, in <module>
+    from waitress import serve
+ModuleNotFoundError: No module named 'waitress'
+Traceback (most recent call last):
+  File "D:\Java_programs\household-expenses\serve.py", line 9, in <module>
+    from waitress import serve
+ModuleNotFoundError: No module named 'waitress'
+Traceback (most recent call last):
+  File "D:\Java_programs\household-expenses\serve.py", line 9, in <module>
+    from waitress import serve
+ModuleNotFoundError: No module named 'waitress'
+Traceback (most recent call last):
+  File "D:\Java_programs\household-expenses\serve.py", line 9, in <module>
+    from waitress import serve
+ModuleNotFoundError: No module named 'waitress'
+Traceback (most recent call last):
+  File "D:\Java_programs\household-expenses\serve.py", line 9, in <module>
+    from waitress import serve
+ModuleNotFoundError: No module named 'waitress'
+Traceback (most recent call last):
+  File "D:\Java_programs\household-expenses\serve.py", line 9, in <module>
+    from waitress import serve
+ModuleNotFoundError: No module named 'waitress'
