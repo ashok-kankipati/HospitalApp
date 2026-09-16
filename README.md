@@ -43,6 +43,12 @@ HospitalApp/
 - Maven 3.6+
 - MySQL Server
 
+## Dummy Update
+
+This is a sample change for Git practice and commit testing.
+This line is added to demonstrate a normal modification in the repository.
+You can remove these lines later once the project is ready.
+
 ## Setup Instructions
 
 ### 1. Database Setup
