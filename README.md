@@ -57,6 +57,35 @@ page. Stop it with Ctrl+C once you've confirmed it works.
 
 (To change the port, edit `PORT` in `serve.py`.)
 
+## Development quick start
+
+From the project folder, activate the virtual environment and run the
+Flask development app:
+
+```powershell
+venv\Scripts\activate
+$env:EXPENSES_SECRET_KEY = "replace-with-a-long-random-value"
+python app.py
+```
+
+Open **http://localhost:5000** in a browser. Use `serve.py` on port 8085
+when testing the production-style Waitress server.
+
+## Git workflow
+
+Create a feature branch, commit your changes, and push it to GitHub:
+
+```powershell
+git switch -c feature/your-change
+git add .
+git commit -m "Describe your change"
+git push -u origin feature/your-change
+```
+
+Do not commit `expenses.db`, backup files, logs, virtual environments, or
+secrets. Keep those files local and configure them separately on the machine
+running the application.
+
 ## 5. Install as a Windows service with NSSM
 
 Open an **elevated (Administrator)** PowerShell/Command Prompt:
