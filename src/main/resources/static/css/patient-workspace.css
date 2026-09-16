@@ -1,0 +1,23 @@
+/* Shared Careflow appearance for the clinical record during the React migration. */
+body{background:#f6f7f4;color:#294333;font-family:"Segoe UI",Arial,sans-serif}
+.container{max-width:1280px;padding:35px 30px}
+.header{border:1px solid #e3e9df;border-radius:15px;box-shadow:none;padding:24px 28px;margin-bottom:24px}
+.header h1{font-size:24px;font-weight:550;letter-spacing:-.7px;color:#34523c}
+.patient-info-section,.tabs-container,.record-card{border:1px solid #e3e9df;border-radius:14px;box-shadow:none;background:#fff}
+.patient-info-section{padding:27px;margin-bottom:24px}
+.patient-info-section h2{color:#365539;font-size:25px;font-weight:550}
+.info-item label{color:#88977f;font-size:11px;letter-spacing:.4px}
+.info-item span{color:#516849;font-size:13px}
+.btn{border-radius:7px;font-size:12px;padding:10px 15px}
+.btn-primary,.btn-edit{background:#176b56;color:#fff}.btn-primary:hover,.btn-edit:hover{background:#115443}
+.btn-secondary{background:#eef3e9;color:#59784c;border:1px solid #dfe8d7}.btn-secondary:hover{background:#e5eedc}
+.btn-danger{background:#f8e9e3;color:#ac6958}.btn-danger:hover{background:#f2d9ce}
+.tabs{background:#fff;border-bottom:1px solid #e4ebdc;overflow-x:auto;flex-wrap:nowrap}
+.tab-button{font-size:12px;white-space:nowrap;padding:17px 23px;color:#899b7b}
+.tab-button.active{border-bottom-color:#176b56;color:#176b56;background:#f4f8ef}
+.tab-content{padding:25px}.tab-header h2{font-size:20px;font-weight:550;color:#45633e}
+.record-card{margin-bottom:16px;padding:20px}.record-title{font-weight:600;color:#426039}
+.modal{background:#19352675;backdrop-filter:blur(4px)}.modal-content{border-radius:15px;box-shadow:0 20px 80px #19352625}
+input,select,textarea{border:1px solid #dfe7d7!important;border-radius:7px!important;padding:10px 12px!important}
+button:focus-visible,a:focus-visible{outline:3px solid #8eb477;outline-offset:3px}
+@media(max-width:650px){.container{padding:18px 12px}.header{padding:19px;gap:12px;flex-wrap:wrap}.patient-info-section,.tab-content{padding:19px}.info-grid{grid-template-columns:1fr}.tab-header{gap:15px;flex-wrap:wrap}.modal-content{width:calc(100% - 24px)}}

@@ -1,0 +1,80 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 929 >>
+stream
+BT
+/F1 12 Tf
+50 760 Td
+/F1 16 Tf
+(Sample Medical Lab Report) Tj
+/F1 12 Tf
+0 -16 Td
+/F1 12 Tf
+(Lab: CityCare Diagnostics) Tj
+0 -16 Td
+(Report ID: LAB-2026-0001) Tj
+0 -16 Td
+(Report Date: 2026-01-26 11:39:09) Tj
+0 -16 Td
+(Patient: John Doe \(ID: P001\)) Tj
+0 -16 Td
+(Doctor: Dr. Michael Smith) Tj
+0 -16 Td
+() Tj
+0 -16 Td
+(Tests:) Tj
+0 -16 Td
+(CBC - Hemoglobin: 13.8 g/dL \(12.0 - 16.0\)) Tj
+0 -16 Td
+(CBC - WBC: 6.2 x10^3/uL \(4.0 - 11.0\)) Tj
+0 -16 Td
+(CBC - Platelets: 245 x10^3/uL \(150 - 450\)) Tj
+0 -16 Td
+(Lipid Profile - Total Cholesterol: 182 mg/dL \(< 200\)) Tj
+0 -16 Td
+(Lipid Profile - LDL: 102 mg/dL \(< 130\)) Tj
+0 -16 Td
+(Lipid Profile - HDL: 52 mg/dL \(> 40\)) Tj
+0 -16 Td
+(Fasting Glucose: 92 mg/dL \(70 - 100\)) Tj
+0 -16 Td
+(ESR: 12 mm/hr \(0 - 20\)) Tj
+0 -16 Td
+() Tj
+0 -16 Td
+(Notes:) Tj
+0 -16 Td
+(All results within normal limits.) Tj
+0 -16 Td
+() Tj
+0 -16 Td
+(Authorized by: Dr. Rahul Ramkrishna) Tj
+0 -16 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000001221 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1291
+%%EOF

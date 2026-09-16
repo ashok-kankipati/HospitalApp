@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Management System - Dashboard</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-content">
+            <button id="sidebarToggle" class="sidebar-toggle" type="button" aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+            <a class="brand" href="#" data-section="dashboard" aria-label="Careflow dashboard"><span class="brand-mark" aria-hidden="true">+</span><span><strong>Careflow</strong><small>Hospital operations</small></span></a>
+            <div class="navbar-context"><span class="context-label">Workspace</span><span class="context-value">Main campus <span class="status-dot"></span></span></div>
+            <div class="navbar-right">
+                <span id="userGreeting" class="user-greeting"></span>
+                <div class="notification-wrapper">
+                    <button id="notificationBell" class="notification-bell" title="Notifications">
+                        <span class="bell-icon">🔔</span>
+                        <span id="notificationBadge" class="notification-badge">0</span>
+                    </button>
+                    <div id="notificationDropdown" class="notification-dropdown">
+                        <div class="notification-header">Notifications</div>
+                        <div id="notificationDropdownList" class="notification-list">Loading...</div>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="logout-btn"><span aria-hidden="true">&#8599;</span> Sign out</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <aside class="sidebar">
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <span class="icon">
+    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <line x1="12" y1="20" x2="12" y2="10"></line>
+        <line x1="18" y1="20" x2="18" y2="4"></line>
+        <line x1="6" y1="20" x2="6" y2="14"></line>
+    </svg>
+</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-section="patients">
+                    <span class="icon">
+    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+    </svg>
+</span>
+                    <span>Patients</span>
+                </a>
+                <a href="#" class="nav-item" data-section="appointments">
+                    <span class="icon">
+    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+    </svg>
+</span>
+                    <span>Appointments</span>
+                </a>
+
+                <a href="#" class="nav-item" data-section="pharmacy">
+                    <span class="icon">
+    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4.5 11.5l7-7a4 4 0 1 1 5.5 5.5l-7 7a4 4 0 1 1-5.5-5.5z"></path>
+        <line x1="8.5" y1="8.5" x2="15.5" y2="15.5"></line>
+    </svg>
+</span>
+                    <span>Pharmacy</span>
+                </a>
+                <a href="#" class="nav-item" data-section="laboratory">
+                    <span class="icon">
+    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M10 2v6.5L5 20a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2l-5-11.5V2"></path>
+        <line x1="8" y1="2" x2="16" y2="2"></line>
+    </svg>
+</span>
+                    <span>Laboratory</span>
+                </a>
+                <a href="#" class="nav-item" data-section="billing">
+                    <span class="icon">
+                        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <line x1="10" y1="9" x2="8" y2="9"></line>
+                        </svg>
+                    </span>
+                    <span>Billing</span>
+                </a>
+                <a href="#" class="nav-item" data-section="beds">
+                    <span class="icon">
+                        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M3 7h12a4 4 0 0 1 4 4v6H3z"></path>
+                            <path d="M3 5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2H3z"></path>
+                            <line x1="3" y1="21" x2="3" y2="13"></line>
+                            <line x1="21" y1="21" x2="21" y2="13"></line>
+                        </svg>
+                    </span>
+                    <span>IPD / Beds</span>
+                </a>
+                <a href="#" class="nav-item" data-section="staff">
+                    <span class="icon">
+                        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+    </svg>
+</span>
+                    <span>Staff</span>
+                </a>
+                <a href="#" class="nav-item" data-section="settings">
+                    <span class="icon">
+    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 5 15.4a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8.6 5a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19 8.6a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+    </svg>
+</span>
+                    <span>Settings</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div id="dashboardSection" class="content-section active">
+                <div class="page-heading"><div><p class="eyebrow">Tuesday, September 15, 2026</p><h1>Good morning<span class="heading-accent">.</span></h1><p class="page-subtitle">Here is what is happening across your hospital today.</p></div><button class="btn-primary heading-action" onclick="openAddPatientModal()"><span aria-hidden="true">+</span> Add patient</button></div>
+                <div class="dashboard-cards">
+                    <div class="card metric-card metric-teal">
+                        <div class="metric-icon" aria-hidden="true">&#9825;</div><div><h3>Total patients</h3><p class="card-value">0</p><span class="metric-note">Registered records</span></div>
+                    </div>
+                    <div class="card metric-card metric-blue">
+                        <div class="metric-icon" aria-hidden="true">&#128197;</div><div><h3>Appointments</h3><p class="card-value">0</p><span class="metric-note">Scheduled visits</span></div>
+                    </div>
+                    <div class="card metric-card metric-amber">
+                        <div class="metric-icon" aria-hidden="true">&#9733;</div><div><h3>Clinical staff</h3><p class="card-value">0</p><span class="metric-note">Active team members</span></div>
+                    </div>
+                    <div class="card metric-card metric-coral">
+                        <div class="metric-icon" aria-hidden="true">&#9632;</div><div><h3>Available beds</h3><p class="card-value" id="dashboardAvailableBeds">0</p><span class="metric-note">Ready for admission</span></div>
+                    </div>
+                </div>
+                <div class="dashboard-lower-grid"><section class="surface welcome-panel"><div class="surface-heading"><div><p class="eyebrow">Operations overview</p><h2>Keep care moving</h2></div><span class="live-pill"><span class="status-dot"></span> Live data</span></div><div class="overview-track"><span></span><span></span><span></span><span></span></div><div class="overview-labels"><span>Patients</span><span>Appointments</span><span>Pharmacy</span><span>Laboratory</span></div><p class="panel-copy">Use the navigation to move from the daily overview into patient care, pharmacy, laboratory, billing, and bed management.</p></section><section class="surface quick-actions"><div class="surface-heading"><div><p class="eyebrow">Shortcuts</p><h2>Quick actions</h2></div></div><button class="quick-action" onclick="openAddPatientModal()"><span class="quick-icon teal">+</span><span><strong>Register patient</strong><small>Create a new patient record</small></span><span class="action-arrow">&#8594;</span></button><button class="quick-action" onclick="document.querySelector('[data-section=appointments]').click()"><span class="quick-icon blue">&#128197;</span><span><strong>View appointments</strong><small>Review today's schedule</small></span><span class="action-arrow">&#8594;</span></button></section></div>
+            </div>
+
+            <div id="patientsSection" class="content-section">
+                <h1>Patients Management</h1>
+                <button class="btn-primary" onclick="openAddPatientModal()">Add New Patient</button>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Patient ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="5" style="text-align: center;">Loading patient data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="appointmentsSection" class="content-section">
+                <h1>Appointments Management</h1>
+                <button class="btn-primary" onclick="openScheduleAppointmentModal()">Schedule Appointment</button>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Appointment ID</th>
+                                <th>Patient</th>
+                                <th>Doctor/Staff</th>
+                                <th>Date & Time</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="7" style="text-align: center;">Loading appointment data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div id="pharmacySection" class="content-section">
+                <h1>Pharmacy</h1>
+                <div class="pharmacy-tabs">
+                    <button class="pharmacy-tab active" data-pharmacy-tab="inventory">Medicine Inventory</button>
+                    <button class="pharmacy-tab" data-pharmacy-tab="dispense">Dispense Medicine</button>
+                    <button class="pharmacy-tab" data-pharmacy-tab="alerts">Stock Alerts</button>
+                </div>
+
+                <div id="pharmacy-inventory" class="pharmacy-tab-content active">
+                    <div class="pharmacy-grid pharmacy-entry-tools">
+                        <details class="pharmacy-card pharmacy-entry">
+                            <summary><span><strong>Add medicine</strong><small>Create a medicine in your catalog</small></span><span class="pharmacy-entry-toggle" aria-hidden="true">+</span></summary>
+                            <form id="addMedicineForm" class="pharmacy-form">
+                                <div class="form-group">
+                                    <label for="medicineName">Medicine Name *</label>
+                                    <input type="text" id="medicineName" name="name" placeholder="e.g. Paracetamol 500 mg" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="medicineDescription">Description</label>
+                                    <textarea id="medicineDescription" name="description" rows="2" placeholder="Optional description"></textarea>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn-primary">Add Medicine</button>
+                                </div>
+                            </form>
+                        </details>
+
+                        <details class="pharmacy-card pharmacy-entry">
+                            <summary><span><strong>Receive stock</strong><small>Add a batch, expiry date and price</small></span><span class="pharmacy-entry-toggle" aria-hidden="true">+</span></summary>
+                            <form id="addBatchForm" class="pharmacy-form">
+                                <div class="form-group">
+                                    <label for="batchMedicine">Medicine *</label>
+                                    <select id="batchMedicine" name="medicineId" required>
+                                        <option value="">Select Medicine</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="batchNo">Batch No *</label>
+                                    <input type="text" id="batchNo" name="batchNo" placeholder="e.g. PCM-2401" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="batchExpiry">Expiry Date *</label>
+                                    <input type="date" id="batchExpiry" name="expiryDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="batchQuantity">Quantity *</label>
+                                    <input type="number" id="batchQuantity" name="quantity" min="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="batchPrice">Price *</label>
+                                    <input type="number" id="batchPrice" name="price" min="0" step="0.01" required>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn-primary">Add Batch</button>
+                                </div>
+                            </form>
+                        </details>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table" id="medicineTable">
+                            <caption><strong>Medicine catalog</strong><span>Registered medicines and descriptions</span></caption>
+                            <colgroup><col style="width:88px"><col style="width:240px"><col><col style="width:64px"></colgroup>
+                            <thead>
+                                <tr>
+                                    <th>Medicine ID</th>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="4" style="text-align: center;">Loading medicines...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table" id="batchTable">
+                            <caption><strong>Stock batches</strong><span>Batch availability, expiry and unit price</span></caption>
+                            <colgroup><col style="width:80px"><col><col style="width:105px"><col style="width:115px"><col style="width:95px"><col style="width:95px"><col style="width:64px"></colgroup>
+                            <thead>
+                                <tr>
+                                    <th>Batch ID</th>
+                                    <th>Medicine</th>
+                                    <th>Batch No</th>
+                                    <th>Expiry</th>
+                                    <th>Available Qty</th>
+                                    <th>Price</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="7" style="text-align: center;">Loading batches...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="pharmacy-dispense" class="pharmacy-tab-content">
+                    <div class="pharmacy-search">
+                        <input type="text" id="prescriptionSearchInput" placeholder="Search by patient name or appointment ID">
+                        <button class="btn-primary" id="prescriptionSearchBtn">Search</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table" id="pharmacyPrescriptionTable">
+                            <thead>
+                                <tr>
+                                    <th>Prescription ID</th>
+                                    <th>Appointment</th>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="7" style="text-align: center;">Loading prescriptions...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="pharmacy-alerts" class="pharmacy-tab-content">
+                    <div class="alerts-grid">
+                        <div class="pharmacy-card">
+                            <h3>Low Stock</h3>
+                            <div id="lowStockList" class="alert-list">Loading...</div>
+                        </div>
+                        <div class="pharmacy-card">
+                            <h3>Expired / Expiring Soon</h3>
+                            <div id="expiredStockList" class="alert-list">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="billingSection" class="content-section">
+                <h1>Billing & Invoices</h1>
+                <div class="filters" style="margin-bottom: 16px;">
+                    <select id="billingPatientFilter">
+                        <option value="">All Patients</option>
+                    </select>
+                    <select id="billingStatusFilter">
+                        <option value="">All Status</option>
+                        <option value="PAID">Paid</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="PARTIAL">Partial</option>
+                    </select>
+                    <button class="btn-primary" onclick="openGenerateInvoiceModal()">Generate Invoice</button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table" id="billingTable">
+                        <thead>
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Patient</th>
+                                <th>Appointment</th>
+                                <th>Status</th>
+                                <th>Total</th>
+                                <th>Paid</th>
+                                <th>Balance</th>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="9" style="text-align: center;">Loading invoices...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="bedsSection" class="content-section">
+                <h1>IPD / Beds</h1>
+                <div class="dashboard-cards bed-summary">
+                    <div class="card">
+                        <h3>Total Beds</h3>
+                        <p class="card-value" id="bedsTotalCount">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>Available Beds</h3>
+                        <p class="card-value" id="bedsAvailableCount">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>Occupied Beds</h3>
+                        <p class="card-value" id="bedsOccupiedCount">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>ICU / General / Private</h3>
+                        <p class="card-value" id="bedsTypeSummary">0 / 0 / 0</p>
+                    </div>
+                </div>
+
+                <div class="pharmacy-tabs bed-tabs">
+                    <button class="pharmacy-tab active" data-bed-tab="list">Bed List</button>
+                    <button class="pharmacy-tab" data-bed-tab="admissions">Active Admissions</button>
+                </div>
+
+                <div id="beds-list" class="pharmacy-tab-content active">
+                    <div class="filters" style="margin-bottom: 16px;">
+                        <button class="btn-primary" onclick="openAddBedModal()">Add Bed</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table" id="bedsTable">
+                            <thead>
+                                <tr>
+                                    <th>Bed No</th>
+                                    <th>Ward</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Daily Charge</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="6" style="text-align: center;">Loading beds...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="beds-admissions" class="pharmacy-tab-content">
+                    <div class="table-container">
+                        <table class="data-table" id="admissionsTable">
+                            <thead>
+                                <tr>
+                                    <th>Admission ID</th>
+                                    <th>Bed</th>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
+                                    <th>Admitted At</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="7" style="text-align: center;">Loading admissions...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="laboratorySection" class="content-section">
+                <h1>Laboratory</h1>
+                <div class="pharmacy-search" style="margin-bottom: 12px;">
+                    <input type="text" id="labSearchInput" placeholder="Search by order ID, visit ID, or test name">
+                    <button class="btn-primary" id="labSearchBtn">Search</button>
+                </div>
+                <div class="lab-tabs">
+                    <button class="lab-tab active" data-lab-tab="pending">Pending Orders</button>
+                    <button class="lab-tab" data-lab-tab="in-progress">In Progress</button>
+                    <button class="lab-tab" data-lab-tab="completed">Completed Orders</button>
+                </div>
+
+                <div id="lab-pending" class="lab-tab-content active">
+                    <div class="table-container">
+                        <table class="data-table" id="labPendingTable">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Visit</th>
+                                    <th>Tests</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="5" style="text-align: center;">Loading lab orders...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="lab-in-progress" class="lab-tab-content">
+                    <div class="table-container">
+                        <table class="data-table" id="labInProgressTable">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Visit</th>
+                                    <th>Tests</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="5" style="text-align: center;">Loading in-progress orders...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="lab-completed" class="lab-tab-content">
+                    <div class="table-container">
+                        <table class="data-table" id="labCompletedTable">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Visit</th>
+                                    <th>Tests</th>
+                                    <th>Status</th>
+                                    <th>Reports</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="5" style="text-align: center;">Loading completed orders...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="staffSection" class="content-section">
+                <h1>Staff Management</h1>
+                <button class="btn-primary" onclick="openAddStaffModal()">Add Staff Member</button>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Staff ID</th>
+                                <th>Name</th>
+                                <th>Position</th>
+                                <th>Department</th>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="6" style="text-align: center;">Loading staff data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="settingsSection" class="content-section">
+                <h1>Settings</h1>
+                <div class="settings-container">
+                    <h3>Account Settings</h3>
+                    <p id="settingsInfo"></p>
+                    <button class="btn-danger" style="margin-top: 20px;">Delete Account</button>
+                </div>
+                <div class="settings-container" style="margin-top: 20px;">
+                    <h3>Notification Settings</h3>
+                    <div id="notificationSettingsContainer">Loading...</div>
+                </div>
+                <div class="settings-container" style="margin-top: 20px;">
+                    <h3>Notification Center</h3>
+                    <div style="margin-bottom: 12px;">
+                        <button class="btn-primary" id="refreshNotificationsBtn">Refresh</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table" id="notificationQueueTable">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Role</th>
+                                    <th>Event</th>
+                                    <th>Channel</th>
+                                    <th>Recipient</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="6" style="text-align: center;">Loading notifications...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Patient Modal -->
+    <div id="addPatientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Patient</h2>
+                <span class="close" onclick="closeAddPatientModal()">&times;</span>
+            </div>
+            <form id="addPatientForm">
+                <div class="form-group">
+                    <label for="patientName">Full Name *</label>
+                    <input type="text" id="patientName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="patientEmail">Email *</label>
+                    <input type="email" id="patientEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="patientPhone">Phone *</label>
+                    <input type="tel" id="patientPhone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="patientDOB">Date of Birth *</label>
+                    <input type="date" id="patientDOB" name="dateOfBirth" required>
+                </div>
+                <div class="form-group">
+                    <label for="patientAddress">Address</label>
+                    <input type="text" id="patientAddress" name="address">
+                </div>
+                <div class="form-group">
+                    <label for="patientMedical">Medical History</label>
+                    <textarea id="patientMedical" name="medicalHistory" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn-primary">Add Patient</button>
+                    <button type="button" class="btn-secondary" onclick="closeAddPatientModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Patient Modal -->
+    <div id="viewPatientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Patient Details</h2>
+                <span class="close" onclick="closeViewPatientModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="patientDetailsContent">
+                <!-- Patient details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeViewPatientModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Staff Modal -->
+    <div id="viewStaffModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Staff Details</h2>
+                <span class="close" onclick="closeViewStaffModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="staffDetailsContent">
+                <!-- Staff details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeViewStaffModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Patient Modal -->
+    <div id="editPatientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Patient</h2>
+                <span class="close" onclick="closeEditPatientModal()">&times;</span>
+            </div>
+            <form id="editPatientForm">
+                <div class="form-group">
+                    <label for="editPatientName">Full Name *</label>
+                    <input type="text" id="editPatientName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPatientEmail">Email *</label>
+                    <input type="email" id="editPatientEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPatientPhone">Phone *</label>
+                    <input type="tel" id="editPatientPhone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPatientDOB">Date of Birth *</label>
+                    <input type="date" id="editPatientDOB" name="dateOfBirth" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPatientAddress">Address</label>
+                    <input type="text" id="editPatientAddress" name="address">
+                </div>
+                <div class="form-group">
+                    <label for="editPatientMedical">Medical History</label>
+                    <textarea id="editPatientMedical" name="medicalHistory" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn-primary">Update Patient</button>
+                    <button type="button" class="btn-secondary" onclick="closeEditPatientModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Staff Modal -->
+    <div id="editStaffModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Staff Member</h2>
+                <span class="close" onclick="closeEditStaffModal()">&times;</span>
+            </div>
+            <form id="editStaffForm">
+                <div class="form-group">
+                    <label for="editStaffName">Full Name *</label>
+                    <input type="text" id="editStaffName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="editStaffEmail">Email *</label>
+                    <input type="email" id="editStaffEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="editStaffPhone">Phone *</label>
+                    <input type="tel" id="editStaffPhone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="editStaffPosition">Position *</label>
+                    <select id="editStaffPosition" name="position" required>
+                        <option value="">Select Position</option>
+                        <option value="Doctor">Doctor</option>
+                        <option value="Nurse">Nurse</option>
+                        <option value="Pharmacist">Pharmacist</option>
+                        <option value="Radiologist">Radiologist</option>
+                        <option value="Lab Technician">Lab Technician</option>
+                        <option value="Receptionist">Receptionist</option>
+                        <option value="Surgeon">Surgeon</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editStaffDepartment">Department *</label>
+                    <select id="editStaffDepartment" name="department" required>
+                        <option value="">Select Department</option>
+                        <option value="Cardiology">Cardiology</option>
+                        <option value="Neurology">Neurology</option>
+                        <option value="Orthopedics">Orthopedics</option>
+                        <option value="Surgery">Surgery</option>
+                        <option value="Emergency">Emergency</option>
+                        <option value="Laboratory">Laboratory</option>
+                        <option value="Radiology">Radiology</option>
+                        <option value="Pharmacy">Pharmacy</option>
+                        <option value="Administration">Administration</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editStaffSpecialization">Specialization *</label>
+                    <input type="text" id="editStaffSpecialization" name="specialization" required>
+                </div>
+                <div class="form-group">
+                    <label for="editStaffJoiningDate">Joining Date *</label>
+                    <input type="date" id="editStaffJoiningDate" name="joiningDate" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn-primary">Update Staff</button>
+                    <button type="button" class="btn-secondary" onclick="closeEditStaffModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Generate Invoice Modal -->
+    <div id="generateInvoiceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Generate Invoice</h2>
+                <span class="close" onclick="closeGenerateInvoiceModal()">&times;</span>
+            </div>
+            <form id="generateInvoiceForm">
+                <div class="form-group">
+                    <label for="invoiceAppointment">Appointment *</label>
+                    <select id="invoiceAppointment" name="appointmentId" required>
+                        <option value="">Loading appointments...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="consultationFee">Consultation Fee</label>
+                    <input type="number" id="consultationFee" name="consultationFee" min="0" step="0.01" value="100.00">
+                </div>
+                <div class="form-group">
+                    <label for="labFee">Lab Fee</label>
+                    <input type="number" id="labFee" name="labFee" min="0" step="0.01" value="0.00">
+                </div>
+                <div class="form-group">
+                    <label for="invoiceTax">Tax</label>
+                    <input type="number" id="invoiceTax" name="tax" min="0" step="0.01" value="0.00">
+                </div>
+                <div class="form-group">
+                    <label for="invoiceDiscount">Discount</label>
+                    <input type="number" id="invoiceDiscount" name="discount" min="0" step="0.01" value="0.00">
+                </div>
+                <div class="form-group">
+                    <label for="invoiceNotes">Notes</label>
+                    <textarea id="invoiceNotes" name="notes" rows="2" placeholder="Optional notes"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn-primary">Generate</button>
+                    <button type="button" class="btn-secondary" onclick="closeGenerateInvoiceModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Invoice Modal -->
+    <div id="viewInvoiceModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Invoice Details</h2>
+                <span class="close" onclick="closeViewInvoiceModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="invoiceDetailsContent">
+                <!-- Invoice details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-primary" id="downloadInvoiceBtn">Download PDF</button>
+                <button type="button" class="btn-secondary" onclick="closeViewInvoiceModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Record Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Record Payment</h2>
+                <span class="close" onclick="closePaymentModal()">&times;</span>
+            </div>
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label for="paymentAmount">Amount *</label>
+                    <input type="number" id="paymentAmount" name="amount" min="0.01" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="paymentMethod">Payment Method</label>
+                    <select id="paymentMethod" name="paymentMethod">
+                        <option value="Cash">Cash</option>
+                        <option value="Credit Card">Credit Card</option>
+                        <option value="Debit Card">Debit Card</option>
+                        <option value="UPI">UPI</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group" id="upiSection" style="display: none;">
+                    <label for="upiId">UPI ID</label>
+                    <input type="text" id="upiId" name="upiId" placeholder="hospital@upi">
+                    <div style="margin-top: 12px; text-align: center;">
+                        <img id="upiQrImage" alt="UPI QR Code" style="max-width: 180px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="paymentReference">Reference</label>
+                    <input type="text" id="paymentReference" name="reference" placeholder="Optional reference">
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn-primary">Save Payment</button>
+                    <button type="button" class="btn-secondary" onclick="closePaymentModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Schedule Appointment Modal -->
+    <div id="scheduleAppointmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Schedule New Appointment</h2>
+                <span class="close" onclick="closeScheduleAppointmentModal()">&times;</span>
+            </div>
+            <form id="scheduleAppointmentForm">
+                <div class="form-group">
+                    <label for="appointmentPatient">Patient *</label>
+                    <select id="appointmentPatient" name="patientId" required>
+                        <option value="">Select Patient</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentDoctor">Doctor/Staff *</label>
+                    <select id="appointmentDoctor" name="staffId" required>
+                        <option value="">Select Doctor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentDate">Date *</label>
+                    <input type="date" id="appointmentDate" name="appointmentDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentTime">Time *</label>
+                    <input type="time" id="appointmentTime" name="appointmentTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentReason">Reason for Appointment</label>
+                    <textarea id="appointmentReason" name="reason" rows="3" placeholder="Enter reason for appointment"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn-primary">Schedule Appointment</button>
+                    <button type="button" class="btn-secondary" onclick="closeScheduleAppointmentModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Staff Modal -->
+    <div id="addStaffModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Staff Member</h2>
+                <span class="close" onclick="closeAddStaffModal()">&times;</span>
+            </div>
+            <form id="addStaffForm">
+                <div class="form-group">
+                    <label for="staffName">Full Name *</label>
+                    <input type="text" id="staffName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="staffEmail">Email *</label>
+                    <input type="email" id="staffEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="staffPhone">Phone *</label>
+                    <input type="tel" id="staffPhone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="staffPosition">Position *</label>
+                    <select id="staffPosition" name="position" required>
+                        <option value="">Select Position</option>
+                        <option value="Doctor">Doctor</option>
+                        <option value="Nurse">Nurse</option>
+                        <option value="Pharmacist">Pharmacist</option>
+                        <option value="Radiologist">Radiologist</option>
+                        <option value="Lab Technician">Lab Technician</option>
+                        <option value="Receptionist">Receptionist</option>
+                        <option value="Surgeon">Surgeon</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="staffDepartment">Department *</label>
+                    <select id="staffDepartment" name="department" required>
+                        <option value="">Select Department</option>
+                        <option value="Cardiology">Cardiology</option>
+                        <option value="Neurology">Neurology</option>
+                        <option value="Orthopedics">Orthopedics</option>
+                        <option value="Surgery">Surgery</option>
+                        <option value="Emergency">Emergency</option>
+                        <option value="Laboratory">Laboratory</option>
+                        <option value="Radiology">Radiology</option>
+                        <option value="Pharmacy">Pharmacy</option>
+                        <option value="Administration">Administration</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="staffSpecialization">Specialization *</label>
+                    <input type="text" id="staffSpecialization" name="specialization" required>
+                </div>
+                <div class="form-group">
+                    <label for="staffJoiningDate">Joining Date *</label>
+                    <input type="date" id="staffJoiningDate" name="joiningDate" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn-primary">Add Staff</button>
+                    <button type="button" class="btn-secondary" onclick="closeAddStaffModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Appointment Modal -->
+    <div id="viewAppointmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Appointment Details</h2>
+                <span class="close" onclick="closeViewAppointmentModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="appointmentDetailsContent">
+                <!-- Appointment details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-primary" id="openConsultationBtn">Open Consultation</button>
+                <button type="button" class="btn-secondary" onclick="closeViewAppointmentModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Appointment Modal -->
+    <div id="editAppointmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Appointment</h2>
+                <span class="close" onclick="closeEditAppointmentModal()">&times;</span>
+            </div>
+            <form id="editAppointmentForm">
+                <input type="hidden" id="editAppointmentId" name="appointmentId">
+                <input type="hidden" id="editAppointmentPatientId" name="patientId">
+                <div class="form-group">
+                    <label for="editAppointmentPatient">Patient</label>
+                    <input type="text" id="editAppointmentPatient" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="editAppointmentStaff">Select Staff/Doctor *</label>
+                    <select id="editAppointmentStaff" name="staffId" required>
+                        <option value="">Loading staff...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editAppointmentDate">Appointment Date *</label>
+                    <input type="date" id="editAppointmentDate" name="appointmentDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="editAppointmentTime">Appointment Time *</label>
+                    <input type="time" id="editAppointmentTime" name="appointmentTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="editAppointmentReason">Reason for Visit *</label>
+                    <textarea id="editAppointmentReason" name="reason" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editAppointmentStatus">Status *</label>
+                    <select id="editAppointmentStatus" name="status" required>
+                        <option value="PENDING">Pending</option>
+                        <option value="CONFIRMED">Confirmed</option>
+                        <option value="COMPLETED">Completed</option>
+                        <option value="CANCELLED">Cancelled</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editAppointmentNotes">Notes</label>
+                    <textarea id="editAppointmentNotes" name="notes" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn-primary">Update Appointment</button>
+                    <button type="button" class="btn-secondary" onclick="closeEditAppointmentModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Consultation Modal -->
+    <div id="consultationModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Consultation</h2>
+                <span class="close" onclick="closeConsultationModal()">&times;</span>
+            </div>
+            <div class="consultation-summary" id="consultationSummary">Loading appointment...</div>
+            <input type="hidden" id="consultationAppointmentId">
+            <input type="hidden" id="consultationDoctorId">
+            <input type="hidden" id="consultationVisitId">
+
+            <div class="consultation-tabs">
+                <button class="consultation-tab active" data-consultation-tab="symptoms">Symptoms</button>
+                <button class="consultation-tab" data-consultation-tab="diagnosis">Diagnosis</button>
+                <button class="consultation-tab" data-consultation-tab="prescription">Prescription</button>
+                <button class="consultation-tab" data-consultation-tab="lab">Lab Tests</button>
+            </div>
+
+            <div id="consultation-symptoms" class="consultation-tab-content active">
+                <div class="form-group">
+                    <label for="consultationSymptoms">Symptoms</label>
+                    <textarea id="consultationSymptoms" rows="4" placeholder="Enter symptoms"></textarea>
+                </div>
+                <button class="btn-secondary" type="button" onclick="saveConsultationNotes()">Save Notes</button>
+            </div>
+
+            <div id="consultation-diagnosis" class="consultation-tab-content">
+                <div class="form-group">
+                    <label for="consultationDiagnosis">Diagnosis</label>
+                    <textarea id="consultationDiagnosis" rows="4" placeholder="Enter diagnosis"></textarea>
+                </div>
+                <button class="btn-secondary" type="button" onclick="saveConsultationNotes()">Save Notes</button>
+            </div>
+
+            <div id="consultation-prescription" class="consultation-tab-content">
+                <div id="consultationPrescriptionInfo" class="consultation-summary"></div>
+                <div class="prescription-actions">
+                    <button class="btn-primary" type="button" onclick="addPrescriptionItemRow()">Add Medicine</button>
+                </div>
+                <div id="prescriptionItemsContainer" class="prescription-items"></div>
+                <div class="modal-footer">
+                    <button class="btn-primary" type="button" onclick="createPrescription()">Create Prescription</button>
+                    <button class="btn-secondary" type="button" onclick="finalizePrescription()">Finalize & Send to Billing</button>
+                </div>
+            </div>
+
+            <div id="consultation-lab" class="consultation-tab-content">
+                <div class="form-group">
+                    <label>Required Lab Tests</label>
+                    <div id="consultationLabTests" class="checkbox-list">Loading tests...</div>
+                </div>
+                <div class="form-group">
+                    <label for="consultationLabPriority">Priority</label>
+                    <select id="consultationLabPriority">
+                        <option value="NORMAL">Normal</option>
+                        <option value="URGENT">Urgent</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="consultationLabNotes">Notes</label>
+                    <textarea id="consultationLabNotes" rows="3" placeholder="Optional notes"></textarea>
+                </div>
+                <button class="btn-primary" type="button" onclick="createLabOrder()">Order Tests</button>
+                <div class="form-group" style="margin-top: 16px;">
+                    <label>Lab Reports</label>
+                    <div id="consultationLabReports" class="report-list">No reports uploaded.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Lab Report Modal -->
+    <div id="labReportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Upload Lab Report</h2>
+                <span class="close" onclick="closeLabReportModal()">&times;</span>
+            </div>
+            <form id="labReportForm">
+                <input type="hidden" id="labReportVisitId">
+                <input type="hidden" id="labReportOrderId">
+                <div class="form-group">
+                    <label for="labReportFileName">File Name *</label>
+                    <input type="text" id="labReportFileName" required>
+                </div>
+                <div class="form-group">
+                    <label for="labReportFileUrl">File URL *</label>
+                    <input type="text" id="labReportFileUrl" required>
+                </div>
+                <div class="form-group">
+                    <label for="labReportMimeType">MIME Type</label>
+                    <input type="text" id="labReportMimeType" placeholder="application/pdf">
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn-primary">Upload</button>
+                    <button type="button" class="btn-secondary" onclick="closeLabReportModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Update Lab Results Modal -->
+    <div id="labResultsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Update Lab Results</h2>
+                <span class="close" onclick="closeLabResultsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="labResultsContainer">Loading...</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeLabResultsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Bed Modal -->
+    <div id="addBedModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Bed</h2>
+                <span class="close" onclick="closeAddBedModal()">&times;</span>
+            </div>
+            <form id="addBedForm">
+                <div class="form-group">
+                    <label for="bedNumber">Bed No *</label>
+                    <input type="text" id="bedNumber" name="bedNumber" required>
+                </div>
+                <div class="form-group">
+                    <label for="bedWard">Ward *</label>
+                    <input type="text" id="bedWard" name="ward" required>
+                </div>
+                <div class="form-group">
+                    <label for="bedType">Type *</label>
+                    <select id="bedType" name="type" required>
+                        <option value="GENERAL">General</option>
+                        <option value="ICU">ICU</option>
+                        <option value="PRIVATE">Private</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="bedDailyCharge">Daily Charge *</label>
+                    <input type="number" id="bedDailyCharge" name="dailyCharge" min="0" step="0.01" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn-primary">Save</button>
+                    <button type="button" class="btn-secondary" onclick="closeAddBedModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admit Patient Modal -->
+    <div id="admitPatientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Admit Patient</h2>
+                <span class="close" onclick="closeAdmitPatientModal()">&times;</span>
+            </div>
+            <form id="admitPatientForm">
+                <input type="hidden" id="admitBedId">
+                <div class="form-group">
+                    <label for="admitPatientId">Patient *</label>
+                    <select id="admitPatientId" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="admitVisitId">Visit *</label>
+                    <input type="number" id="admitVisitId" required>
+                </div>
+                <div class="form-group">
+                    <label for="admitDoctorId">Doctor *</label>
+                    <select id="admitDoctorId" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="admitNotes">Notes</label>
+                    <textarea id="admitNotes" rows="2"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn-primary">Admit</button>
+                    <button type="button" class="btn-secondary" onclick="closeAdmitPatientModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dispense Modal -->
+    <div id="dispenseModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Dispense Medicine</h2>
+                <span class="close" onclick="closeDispenseModal()">&times;</span>
+            </div>
+            <div id="dispenseSummary" class="consultation-summary"></div>
+            <div id="dispenseItemsContainer" class="prescription-items"></div>
+            <div class="modal-footer">
+                <button class="btn-primary" type="button" onclick="confirmDispense()">Confirm Dispense</button>
+                <button class="btn-secondary" type="button" onclick="closeDispenseModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

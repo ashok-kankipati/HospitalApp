@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Details</title>
+    <link rel="stylesheet" href="/css/patient-details.css">
+    <link rel="stylesheet" href="/css/patient-workspace.css">
+    <link rel="stylesheet" href="/css/workflow-icons.css">
+    <link rel="stylesheet" href="/css/button-theme.css">
+    <link rel="stylesheet" href="/css/status-theme.css">
+<link rel="stylesheet" href="/css/form-validation.css">
+<script src="/js/form-validation.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Patient Details</h1>
+            <button id="backBtn" class="btn btn-secondary">Back to Dashboard</button>
+        </div>
+
+        <!-- Patient Info Section -->
+        <div class="patient-info-section">
+            <h2 id="patientName">Loading...</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Email:</label>
+                    <span id="patientEmail">-</span>
+                </div>
+                <div class="info-item">
+                    <label>Phone:</label>
+                    <span id="patientPhone">-</span>
+                </div>
+                <div class="info-item">
+                    <label>Date of Birth:</label>
+                    <span id="patientDOB">-</span>
+                </div>
+                <div class="info-item">
+                    <label>Address:</label>
+                    <span id="patientAddress">-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs Section -->
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab-button active" data-tab="medical-history">Medical History</button>
+                <button class="tab-button" data-tab="allergies">Allergies</button>
+                <button class="tab-button" data-tab="chronic-conditions">Chronic Conditions</button>
+                <button class="tab-button" data-tab="prescriptions">Prescription History</button>
+            </div>
+
+            <!-- Medical History Tab -->
+            <div id="medical-history" class="tab-content active">
+                <div class="tab-header">
+                    <h3>Medical History</h3>
+                    <button class="btn btn-primary" id="addHistoryBtn">+ Add History</button>
+                </div>
+                <div id="historyList" class="records-list">
+                    <p class="no-data">No medical history records found.</p>
+                </div>
+            </div>
+
+            <!-- Allergies Tab -->
+            <div id="allergies" class="tab-content">
+                <div class="tab-header">
+                    <h3>Allergies</h3>
+                    <button class="btn btn-primary" id="addAllergyBtn">+ Add Allergy</button>
+                </div>
+                <div id="allergyList" class="records-list">
+                    <p class="no-data">No allergy records found.</p>
+                </div>
+            </div>
+
+            <!-- Chronic Conditions Tab -->
+            <div id="chronic-conditions" class="tab-content">
+                <div class="tab-header">
+                    <h3>Chronic Conditions</h3>
+                    <button class="btn btn-primary" id="addConditionBtn">+ Add Condition</button>
+                </div>
+                <div id="conditionList" class="records-list">
+                    <p class="no-data">No chronic condition records found.</p>
+                </div>
+            </div>
+
+            <!-- Prescription History Tab -->
+            <div id="prescriptions" class="tab-content">
+                <div class="tab-header">
+                    <h3>Prescription History</h3>
+                    <button class="btn btn-secondary" id="printPrescriptionHistoryBtn">Download / Print</button>
+                </div>
+                <div id="prescriptionHistoryList" class="records-list">
+                    <p class="no-data">No prescriptions found.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Medical History Modal -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="historyModalTitle">Add Medical History</h2>
+            <form id="historyForm">
+                <div class="form-group">
+                    <label for="historyType">History Type:</label>
+                    <input type="text" id="historyType" required placeholder="e.g., Surgery, Hospitalization">
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea id="description" required placeholder="Enter detailed description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="historyDate">Date:</label>
+                    <input type="date" id="historyDate">
+                </div>
+                <div class="form-group">
+                    <label for="historyNotes">Notes:</label>
+                    <textarea id="historyNotes" placeholder="Additional notes"></textarea>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeHistoryModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Allergy Modal -->
+    <div id="allergyModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="allergyModalTitle">Add Allergy</h2>
+            <form id="allergyForm">
+                <div class="form-group">
+                    <label for="allergyType">Allergy Type:</label>
+                    <select id="allergyType" required>
+                        <option value="">Select Type</option>
+                        <option value="Food">Food</option>
+                        <option value="Medicine">Medicine</option>
+                        <option value="Environmental">Environmental</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="allergyName">Allergy Name:</label>
+                    <input type="text" id="allergyName" required placeholder="e.g., Peanuts, Penicillin">
+                </div>
+                <div class="form-group">
+                    <label for="reaction">Reaction:</label>
+                    <input type="text" id="reaction" placeholder="e.g., Itching, Rash, Anaphylaxis">
+                </div>
+                <div class="form-group">
+                    <label for="severity">Severity:</label>
+                    <select id="severity">
+                        <option value="">Select Severity</option>
+                        <option value="Mild">Mild</option>
+                        <option value="Moderate">Moderate</option>
+                        <option value="Severe">Severe</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="allergyNotes">Notes:</label>
+                    <textarea id="allergyNotes" placeholder="Additional notes"></textarea>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAllergyModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Chronic Condition Modal -->
+    <div id="conditionModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="conditionModalTitle">Add Chronic Condition</h2>
+            <form id="conditionForm">
+                <div class="form-group">
+                    <label for="conditionName">Condition Name:</label>
+                    <input type="text" id="conditionName" required placeholder="e.g., Diabetes, Hypertension">
+                </div>
+                <div class="form-group">
+                    <label for="diagnosedDate">Diagnosed Date:</label>
+                    <input type="date" id="diagnosedDate">
+                </div>
+                <div class="form-group">
+                    <label for="status">Status:</label>
+                    <select id="status" required>
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="INACTIVE">INACTIVE</option>
+                        <option value="UNDER_OBSERVATION">UNDER OBSERVATION</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="conditionNotes">Notes:</label>
+                    <textarea id="conditionNotes" placeholder="Additional notes"></textarea>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeConditionModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/vendor/purify.min.js"></script>
+    <script src="/js/safe-html.js"></script>
+    <script src="/js/patient-details.js"></script>
+    <script src="/js/workflow-icons.js"></script>
+</body>
+</html>

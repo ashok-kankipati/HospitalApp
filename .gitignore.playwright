@@ -1,0 +1,25 @@
+# Playwright test artifacts
+playwright-report/
+test-results/
+.playwright/
+
+# Node modules
+node_modules/
+
+# Build outputs
+dist/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local

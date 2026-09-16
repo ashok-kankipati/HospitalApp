@@ -1,0 +1,14 @@
+.cf-workflow-button{display:inline-flex!important;align-items:center;justify-content:center;gap:8px;vertical-align:middle}
+.cf-workflow-icon{display:block;flex:0 0 auto;width:17px;height:17px;pointer-events:none}
+.cf-workflow-actions,.appointments-actions,.record-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+/* Match the React patient directory, overriding the original colored button variants. */
+body .cf-workflow-icon-only,body #legacy-workspace .cf-workflow-icon-only{position:relative;width:34px!important;height:34px!important;min-height:34px!important;min-width:34px!important;padding:7px!important;margin:0!important;border:0!important;border-radius:7px!important;background:transparent!important;color:#77847c!important;box-shadow:none!important;line-height:1!important;gap:0!important;transform:none!important}
+body .cf-workflow-icon-only:hover,body #legacy-workspace .cf-workflow-icon-only:hover{background:#eaf1e9!important;color:#176b56!important}
+body .cf-workflow-icon-only.cf-workflow-danger:hover,body #legacy-workspace .cf-workflow-icon-only.cf-workflow-danger:hover{background:#fbede8!important;color:#b05b49!important}
+.cf-workflow-icon-only:focus-visible{outline:2px solid #78b7a5!important;outline-offset:2px}
+.cf-workflow-icon-only>.cf-workflow-label{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important}
+.cf-workflow-icon-only:disabled{opacity:.4!important;cursor:not-allowed!important}
+.cf-workflow-button[data-workflow-icon="loading"]>.cf-workflow-icon{animation:cf-workflow-spin 1s linear infinite}
+@keyframes cf-workflow-spin{to{transform:rotate(360deg)}}
+@media(pointer:coarse){body .cf-workflow-icon-only,body #legacy-workspace .cf-workflow-icon-only{width:42px!important;height:42px!important;min-width:42px!important}}
+@media(prefers-reduced-motion:reduce){.cf-workflow-icon{animation:none!important}}

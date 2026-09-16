@@ -1,0 +1,206 @@
+/* Quiet, rounded controls shared by React and the clinical workflow screens. */
+:root {
+    --control-ink: #33483e;
+    --control-border: #dce4dd;
+    --control-focus: #84a795;
+}
+
+.cf-button,
+#legacy-workspace button:is(.btn-primary, .btn-secondary, .btn-danger):not(.cf-workflow-icon-only),
+body > .container .btn:not(.cf-workflow-icon-only) {
+    min-height: 32px;
+    padding: 6px 11px;
+    border-radius: 9px;
+    font-size: 11px;
+    font-weight: 550;
+    letter-spacing: .1px;
+    gap: 6px;
+    transition: background .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.cf-button-primary,
+#legacy-workspace button.btn-primary:not(.cf-workflow-icon-only),
+body > .container .btn-primary:not(.cf-workflow-icon-only) {
+    color: #365846;
+    background: #edf3ed;
+    border: 1px solid #d7e3d8;
+    box-shadow: none;
+}
+
+.cf-button-primary:hover:not(:disabled),
+#legacy-workspace button.btn-primary:not(.cf-workflow-icon-only):hover:not(:disabled),
+body > .container .btn-primary:not(.cf-workflow-icon-only):hover:not(:disabled) {
+    background: #e1ece2;
+    border-color: #b7cebb;
+    box-shadow: 0 2px 4px #213c2b08;
+    transform: translateY(-1px);
+}
+
+.cf-button-primary > svg,
+#legacy-workspace .btn-primary:not(.cf-workflow-icon-only) > .cf-workflow-icon,
+body > .container .btn-primary:not(.cf-workflow-icon-only) > .cf-workflow-icon {
+    width: 15px;
+    height: 15px;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    color: currentColor;
+}
+
+.cf-button-secondary,
+#legacy-workspace button.btn-secondary:not(.cf-workflow-icon-only),
+body > .container .btn-secondary:not(.cf-workflow-icon-only) {
+    background: linear-gradient(#fff, #f8faf6);
+    color: #627568;
+    border: 1px solid var(--control-border);
+    box-shadow: 0 2px 3px #213c2b03;
+}
+
+.cf-button-secondary:hover:not(:disabled),
+#legacy-workspace button.btn-secondary:not(.cf-workflow-icon-only):hover:not(:disabled) {
+    background: #f0f5ed;
+    border-color: #bbcfc0;
+    color: #3d5948;
+}
+
+.cf-button-danger,
+#legacy-workspace button.btn-danger:not(.cf-workflow-icon-only) {
+    background: #f6ebe6;
+    color: #975b4b;
+    border: 1px solid #ead8ce;
+    box-shadow: none;
+}
+
+.cf-button:active:not(:disabled),
+#legacy-workspace button.cf-workflow-button:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: inset 0 2px 3px #213c2b0d;
+}
+
+.cf-button:focus-visible,
+#legacy-workspace button.cf-workflow-button:focus-visible {
+    outline: 2px solid var(--control-focus);
+    outline-offset: 3px;
+}
+
+.cf-button:disabled,
+#legacy-workspace button.cf-workflow-button:disabled {
+    opacity: .45;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Compact actions get the same rounded silhouette with a subtle surface. */
+.cf-row-actions .cf-icon-button,
+body .cf-workflow-icon-only,
+body #legacy-workspace .cf-workflow-icon-only {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+    padding: 6px !important;
+    border: 1px solid #e5ebe2 !important;
+    border-radius: 8px !important;
+    background: #f8faf6 !important;
+    color: #718273 !important;
+    box-shadow: inset 0 1px 0 #fff !important;
+    transition: background .18s, border-color .18s, color .18s;
+}
+
+.cf-row-actions .cf-icon-button:hover,
+body .cf-workflow-icon-only:hover,
+body #legacy-workspace .cf-workflow-icon-only:hover {
+    background: #eaf1e6 !important;
+    border-color: #c5d7c4 !important;
+    color: #365a40 !important;
+}
+
+body .cf-workflow-icon-only.cf-workflow-danger:hover,
+body #legacy-workspace .cf-workflow-icon-only.cf-workflow-danger:hover {
+    background: #f7ede7 !important;
+    border-color: #e8d3c7 !important;
+    color: #9a604d !important;
+}
+
+/* Segmented navigation replaces the older underlined tabs. */
+#legacy-workspace :is(.pharmacy-tabs, .lab-tabs, .consultation-tabs),
+body > .container .tabs {
+    display: flex;
+    width: fit-content;
+    max-width: 100%;
+    padding: 5px;
+    gap: 4px;
+    border: 1px solid #e2e8dd;
+    border-radius: 14px;
+    background: #eef2e9;
+    box-shadow: inset 0 1px 2px #354f3003;
+}
+
+#legacy-workspace :is(.pharmacy-tab, .lab-tab, .consultation-tab),
+body > .container .tab-button {
+    padding: 7px 12px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    color: #76866c;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: none;
+}
+
+#legacy-workspace :is(.pharmacy-tab, .lab-tab, .consultation-tab).active,
+body > .container .tab-button.active {
+    color: #405c3f;
+    background: #fff;
+    border: 1px solid #e0e7d8;
+    box-shadow: 0 2px 4px #36502908;
+}
+
+/* Give the pharmacy inputs an intentional, aligned form layout. */
+#legacy-workspace .pharmacy-card { padding: 25px; }
+#legacy-workspace .pharmacy-card h3 { margin: 0 0 22px; }
+#legacy-workspace .pharmacy-form { display: grid; gap: 18px; }
+#legacy-workspace .pharmacy-form .form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin: 0;
+}
+#legacy-workspace .pharmacy-form .form-group label { font-size: 12px; color: #6c7c61; }
+#legacy-workspace .pharmacy-form :is(input, select, textarea) {
+    width: 100%;
+    min-width: 0;
+    min-height: 43px;
+    padding: 11px 13px;
+    border-radius: 10px;
+    border-color: #e0e7d9;
+    background: #fcfdfa;
+}
+#legacy-workspace .pharmacy-form textarea { min-height: 90px; resize: vertical; }
+#legacy-workspace .pharmacy-form .modal-footer {
+    margin-top: 3px;
+    padding: 18px 0 0;
+    background: transparent;
+    border-top: 1px solid #eef1e8;
+}
+@media (pointer: coarse) {
+    .cf-row-actions .cf-icon-button,
+    body .cf-workflow-icon-only,
+    body #legacy-workspace .cf-workflow-icon-only { width: 40px !important; height: 40px !important; min-width: 40px !important; }
+}
+@media (max-width: 760px) {
+    #legacy-workspace :is(.pharmacy-tabs, .lab-tabs, .consultation-tabs) { overflow-x: auto; flex-wrap: nowrap; }
+    #legacy-workspace .pharmacy-card { padding: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .cf-button, .cf-workflow-button { transition: none !important; transform: none !important; }
+}
+
+/* Keep unavailable role actions visible and clearly non-interactive. */
+button:disabled { cursor: not-allowed; }
+button[data-role-disabled="true"], .cf-button:disabled, .cf-shortcut:disabled, .cf-icon-button:disabled {
+    opacity: .42;
+    box-shadow: none;
+}

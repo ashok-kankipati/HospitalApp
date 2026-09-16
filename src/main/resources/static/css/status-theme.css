@@ -1,0 +1,50 @@
+/* Compact shared status: a colored dot and readable label without a band. */
+.cf-badge,
+body #legacy-workspace .badge.cf-status-pill,
+body .cf-status-pill {
+    --pill-ink: #697780;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 5px;
+    box-sizing: border-box;
+    width: auto;
+    height: 20px;
+    padding: 0;
+    min-height: 20px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--pill-ink);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: .05px;
+    text-transform: none;
+    white-space: nowrap;
+    box-shadow: none;
+    vertical-align: middle;
+}
+.cf-badge::before,
+.cf-status-pill::before {
+    content: "";
+    display: block;
+    width: 6px;
+    height: 6px;
+    flex: 0 0 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+:is(body .cf-badge, body #legacy-workspace .badge.cf-status-pill, body .cf-status-pill):is([data-status="completed"], [data-status="paid"], [data-status="sent"], [data-status="dispensed"]) {
+    --pill-ink: #4f8274;
+}
+:is(body .cf-badge, body #legacy-workspace .badge.cf-status-pill, body .cf-status-pill):is([data-status="confirmed"], [data-status="scheduled"], [data-status="active"], [data-status="available"]) {
+    --pill-ink: #587ca0;
+}
+:is(body .cf-badge, body #legacy-workspace .badge.cf-status-pill, body .cf-status-pill):is([data-status="pending"], [data-status="in-progress"], [data-status="partial"], [data-status="partially-paid"], [data-status="occupied"], [data-status="maintenance"]) {
+    --pill-ink: #a08550;
+}
+:is(body .cf-badge, body #legacy-workspace .badge.cf-status-pill, body .cf-status-pill):is([data-status="cancelled"], [data-status="canceled"], [data-status="inactive"], [data-status="failed"]) {
+    --pill-ink: #a27c7e;
+}

@@ -1,0 +1,33 @@
+{
+  "name": "hospital-app-tests",
+  "version": "1.0.0",
+  "description": "Playwright automation tests for Hospital Management System",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:headed": "playwright test --headed",
+    "test:patient": "playwright test patient",
+    "test:auth": "playwright test auth",
+    "test:performance": "playwright test performance",
+    "test:regression": "playwright test regression",
+    "test:report": "playwright show-report",
+    "test:install": "playwright install",
+    "ui:dev": "npm --prefix frontend run dev",
+    "ui:build": "npm --prefix frontend run build",
+    "ui:test": "npm --prefix frontend test"
+  },
+  "keywords": [
+    "playwright",
+    "testing",
+    "e2e"
+  ],
+  "author": "Hospital App Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  }
+}
