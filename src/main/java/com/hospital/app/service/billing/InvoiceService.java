@@ -52,6 +52,8 @@ import com.lowagie.text.pdf.PdfWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -466,7 +468,7 @@ public class InvoiceService {
     public InvoiceDocument generateUpiQr(Long invoiceId, String upiId, BigDecimal amount) {
         String recipientUpiId = upiId == null || upiId.trim().isEmpty() ? configuredUpiId : upiId;
         if (recipientUpiId == null || recipientUpiId.trim().isEmpty()) {
-            throw new IllegalArgumentException("Hospital UPI ID is not configured");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "UPI QR is not configured on the server.");
         }
         Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow();
         BigDecimal payAmount = safeAmount(amount);
