@@ -32,6 +32,18 @@ public class InvoicePayment {
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
 
+    @Column(name = "gateway_order_id")
+    private String gatewayOrderId;
+
+    @Column(name = "gateway_payment_id")
+    private String gatewayPaymentId;
+
+    @Column(name = "gateway_signature")
+    private String gatewaySignature;
+
+    @Column(name = "gateway_status")
+    private String gatewayStatus;
+
     @Column
     private String reference;
 
@@ -42,6 +54,9 @@ public class InvoicePayment {
         }
         if (paymentStatus == null) {
             paymentStatus = "PAID";
+        }
+        if (gatewayStatus == null) {
+            gatewayStatus = paymentStatus;
         }
     }
 }
