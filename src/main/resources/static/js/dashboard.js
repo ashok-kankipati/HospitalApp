@@ -614,12 +614,13 @@ function loadBillingData() {
 
     Promise.all([
         invoicesRequest.then(r => r.ok ? r.json() : []),
-        fetch('/api/patients?includeInactive=true').then(r => r.ok ? r.json() : [])
+        fetch('/api/patients?includeInactive=true').then(r => r.ok ? r.json() : []),
+        fetch('/api/billing/invoices/payment-options').then(r => r.ok ? r.json() : { enabled: false, keyId: '' })
     ])
-        .then(([invoices, patients]) => {
+        .then(([invoices, patients, paymentOptions]) => {
             const patientMap = {};
             patients.forEach(p => patientMap[p.id] = p.name);
-
+            const onlineEnabled = paymentOptions && paymentOptions.enabled;
             let filtered = invoices || [];
             if (status) {
                 filtered = filtered.filter(inv => inv.status === status);
@@ -645,6 +646,7 @@ function loadBillingData() {
                             <button class="btn-small btn-info" data-cf-action="viewInvoice(${inv.id})">View</button>
                             <button class="btn-small" data-cf-action="downloadInvoicePdf(${inv.id})">PDF</button>
                             ${inv.balanceDue > 0 ? `<button class="btn-small btn-warning" data-cf-action="openPaymentModal(${inv.id}, ${inv.balanceDue})">Pay</button>` : ''}
+                            ${onlineEnabled && inv.balanceDue > 0 ? `<button class="btn-small btn-primary" data-cf-action="openPaymentModal(${inv.id}, ${inv.balanceDue})">Pay Online</button>` : ''}
                         </div>
                     </td>
                 </tr>
@@ -883,7 +885,29 @@ function openPaymentModal(invoiceId, balanceDue) {
         amountField.value = Number(balanceDue || 0).toFixed(2);
         amountField.max = Number(balanceDue || 0).toFixed(2);
     }
+    const paymentMethod = document.getElementById('paymentMethod');
+    if (paymentMethod) {
+        paymentMethod.value = 'Cash';
+    }
     updatePaymentMethodUI();
+    fetch('/api/billing/invoices/payment-options')
+        .then(async response => {
+            if (!response.ok) return null;
+            return response.json();
+        })
+        .then(config => {
+            if (!config || !config.enabled) return;
+            const option = document.getElementById('paymentMethod');
+            if (!option) return;
+            const hasOnline = Array.from(option.options).some(opt => opt.value === 'Razorpay');
+            if (!hasOnline) {
+                const onlineOption = document.createElement('option');
+                onlineOption.value = 'Razorpay';
+                onlineOption.textContent = 'Razorpay Online';
+                option.appendChild(onlineOption);
+            }
+        })
+        .catch(() => {});
 }
 
 function closePaymentModal() {
@@ -901,9 +925,17 @@ function handlePaymentSubmit(event) {
         return;
     }
     const formData = new FormData(event.target);
+    const paymentMethod = formData.get('paymentMethod');
+    const amount = parseFloat(formData.get('amount')) || 0;
+
+    if (paymentMethod === 'Razorpay') {
+        submitRazorpayPayment(amount);
+        return;
+    }
+
     const payload = {
-        amount: parseFloat(formData.get('amount')) || 0,
-        paymentMethod: formData.get('paymentMethod'),
+        amount: amount,
+        paymentMethod: paymentMethod,
         reference: formData.get('reference')
     };
 
@@ -929,6 +961,83 @@ function handlePaymentSubmit(event) {
         });
 }
 
+function submitRazorpayPayment(amount) {
+    fetch('/api/billing/invoices/payment-options')
+        .then(async response => {
+            if (!response.ok) {
+                throw new Error('Razorpay is not available right now.');
+            }
+            return response.json();
+        })
+        .then(paymentOptions => {
+            if (!paymentOptions || !paymentOptions.enabled || !paymentOptions.keyId) {
+                throw new Error('Razorpay is disabled or not configured.');
+            }
+            return fetch(`/api/billing/invoices/${currentInvoiceIdForPayment}/razorpay/order`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: amount })
+            });
+        })
+        .then(async response => {
+            if (!response.ok) {
+                throw new Error(await hospitalResponseError(response, 'Failed to create Razorpay order'));
+            }
+            return response.json();
+        })
+        .then(order => {
+            if (!window.Razorpay) {
+                throw new Error('Razorpay script is not loaded.');
+            }
+            return fetch('/api/billing/invoices/payment-options')
+                .then(async res => res.ok ? res.json() : null)
+                .then(config => {
+                    const options = {
+                        key: config && config.keyId ? config.keyId : '',
+                        amount: order.amount,
+                        currency: order.currency || 'INR',
+                        name: 'Hospital Management',
+                        description: 'Invoice payment',
+                        order_id: order.id,
+                        handler: function (response) {
+                            fetch(`/api/billing/invoices/${currentInvoiceIdForPayment}/razorpay/verify`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    amount: amount
+                                })
+                            })
+                                .then(async verifyResponse => {
+                                    if (!verifyResponse.ok) {
+                                        throw new Error(await hospitalResponseError(verifyResponse, 'Payment verification failed'));
+                                    }
+                                    return verifyResponse.json();
+                                })
+                                .then(() => {
+                                    alert('Payment verified successfully!');
+                                    closePaymentModal();
+                                    loadBillingData();
+                                })
+                                .catch(error => {
+                                    console.error('Razorpay verification failed:', error);
+                                    alert('Payment verification failed: ' + error.message);
+                                });
+                        },
+                        theme: { color: '#1d4ed8' }
+                    };
+                    const razorpayInstance = new window.Razorpay(options);
+                    razorpayInstance.open();
+                });
+        })
+        .catch(error => {
+            console.error('Error creating Razorpay order:', error);
+            alert('Error starting Razorpay payment: ' + error.message);
+        });
+}
+
 function updatePaymentMethodUI() {
     const paymentMethod = document.getElementById('paymentMethod');
     const upiSection = document.getElementById('upiSection');
@@ -945,23 +1054,16 @@ function updatePaymentMethodUI() {
 
 function updateUpiQrPreview() {
     const qrImg = document.getElementById('upiQrImage');
-    const upiIdInput = document.getElementById('upiId');
     const amountField = document.getElementById('paymentAmount');
-    if (!qrImg || !upiIdInput || !amountField || !currentInvoiceIdForPayment) return;
+    if (!qrImg || !amountField || !currentInvoiceIdForPayment) return;
 
-    if (window.HospitalValidation.message(upiIdInput) || window.HospitalValidation.message(amountField)) return;
-    const upiId = (upiIdInput.value || '').trim();
+    if (window.HospitalValidation.message(amountField)) return;
     const amount = Number(amountField.value || 0).toFixed(2);
-    if (!upiId) {
-        qrImg.src = '';
-        qrImg.alt = 'Enter UPI ID to generate QR';
-        return;
-    }
 
     fetch(`/api/billing/invoices/${currentInvoiceIdForPayment}/upi-qr`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ upiId: upiId, amount: parseFloat(amount) || 0 })
+        body: JSON.stringify({ amount: parseFloat(amount) || 0 })
     })
         .then(async response => {
             if (!response.ok) throw new Error(await hospitalResponseError(response, 'Failed to generate UPI QR'));
@@ -973,7 +1075,8 @@ function updateUpiQrPreview() {
         })
         .catch(error => {
             console.error('Error generating UPI QR:', error);
-            qrImg.alt = 'Failed to generate QR';
+            qrImg.src = '';
+            qrImg.alt = error.message || 'Failed to generate QR';
         });
 }
 

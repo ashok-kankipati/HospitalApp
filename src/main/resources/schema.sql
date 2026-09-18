@@ -212,9 +212,23 @@ CREATE TABLE IF NOT EXISTS invoice_payments (
     payment_method VARCHAR(50),
     payment_status VARCHAR(20) DEFAULT 'PAID',
     paid_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    gateway_order_id VARCHAR(255),
+    gateway_payment_id VARCHAR(255),
+    gateway_signature VARCHAR(255),
+    gateway_status VARCHAR(50) DEFAULT 'PENDING',
     reference VARCHAR(255),
-    CONSTRAINT fk_invoice_payments_invoice FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
+    CONSTRAINT fk_invoice_payments_invoice FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
+    CONSTRAINT uq_invoice_payment_gateway_order UNIQUE (gateway_order_id),
+    CONSTRAINT uq_invoice_payment_gateway_payment UNIQUE (gateway_payment_id)
 );
+
+ALTER TABLE invoice_payments ADD COLUMN IF NOT EXISTS gateway_order_id VARCHAR(255);
+ALTER TABLE invoice_payments ADD COLUMN IF NOT EXISTS gateway_payment_id VARCHAR(255);
+ALTER TABLE invoice_payments ADD COLUMN IF NOT EXISTS gateway_signature VARCHAR(255);
+ALTER TABLE invoice_payments ADD COLUMN IF NOT EXISTS gateway_status VARCHAR(50) DEFAULT 'PENDING';
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_invoice_payments_gateway_order ON invoice_payments(gateway_order_id) WHERE gateway_order_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_invoice_payments_gateway_payment ON invoice_payments(gateway_payment_id) WHERE gateway_payment_id IS NOT NULL;
 
 -- Stored invoice documents (PDFs)
 CREATE TABLE IF NOT EXISTS invoice_documents (

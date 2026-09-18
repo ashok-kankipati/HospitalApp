@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hospital Management System - Dashboard</title>
     <link rel="stylesheet" href="css/dashboard.css">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
     <div class="navbar">
@@ -852,8 +853,8 @@
                     </select>
                 </div>
                 <div class="form-group" id="upiSection" style="display: none;">
-                    <label for="upiId">UPI ID</label>
-                    <input type="text" id="upiId" name="upiId" placeholder="hospital@upi">
+                    <p>Scan this QR code with PhonePe or another UPI app to pay the exact amount.</p>
+                    <input type="hidden" id="upiId" name="upiId" value="">
                     <div style="margin-top: 12px; text-align: center;">
                         <img id="upiQrImage" alt="UPI QR Code" style="max-width: 180px;">
                     </div>

@@ -50,7 +50,10 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -75,6 +78,9 @@ public class InvoiceService {
 
     @Autowired
     private InvoiceDocumentRepository invoiceDocumentRepository;
+
+    @Value("${hospital.upi.id:}")
+    private String configuredUpiId;
 
     @Autowired
     private AppointmentRepository appointmentRepository;
@@ -219,23 +225,42 @@ public class InvoiceService {
 
     public InvoicePayment addPayment(Long invoiceId, InvoicePaymentRequest request) {
         Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow();
-        String previousStatus = invoice.getStatus();
         BigDecimal amount = safeAmount(request.getAmount());
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Payment amount must be greater than zero");
         }
-
         if (amount.compareTo(safeAmount(invoice.getBalanceDue())) > 0)
             throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "Payment cannot exceed the outstanding invoice balance.");
+
         InvoicePayment payment = new InvoicePayment();
         payment.setInvoiceId(invoiceId);
         payment.setAmount(amount);
         payment.setPaymentMethod(request.getPaymentMethod());
         payment.setReference(request.getReference());
         payment.setPaymentStatus("PAID");
+        payment.setGatewayStatus("PAID");
+
+        return recordPayment(invoice, payment);
+    }
+
+    public InvoicePayment recordPayment(Invoice invoice, InvoicePayment payment) {
+        if (invoice == null || payment == null) {
+            throw new IllegalArgumentException("Invoice and payment are required.");
+        }
+        if (payment.getGatewayPaymentId() != null && invoicePaymentRepository.existsByGatewayPaymentId(payment.getGatewayPaymentId())) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT, "This payment was already processed.");
+        }
+        if (payment.getAmount() == null || payment.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Payment amount must be greater than zero");
+        }
+        if (payment.getAmount().compareTo(safeAmount(invoice.getBalanceDue())) > 0) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "Payment cannot exceed the outstanding invoice balance.");
+        }
+
+        String previousStatus = invoice.getStatus();
         InvoicePayment savedPayment = invoicePaymentRepository.save(payment);
 
-        BigDecimal newPaid = safeAmount(invoice.getAmountPaid()).add(amount);
+        BigDecimal newPaid = safeAmount(invoice.getAmountPaid()).add(payment.getAmount());
         BigDecimal balance = safeAmount(invoice.getTotal()).subtract(newPaid);
         if (balance.compareTo(BigDecimal.ZERO) < 0) {
             balance = BigDecimal.ZERO;
@@ -251,6 +276,10 @@ public class InvoiceService {
         }
 
         return savedPayment;
+    }
+
+    public InvoicePayment recordGatewayPayment(Invoice invoice, InvoicePayment payment) {
+        return recordPayment(invoice, payment);
     }
 
     public void addOrUpdateDispensedItemInvoice(com.hospital.app.model.pharmacy.DispensedItem dispensedItem) {
@@ -437,31 +466,24 @@ public class InvoiceService {
     }
 
     public InvoiceDocument generateUpiQr(Long invoiceId, String upiId, BigDecimal amount) {
-        if (upiId == null || upiId.trim().isEmpty()) {
-            throw new IllegalArgumentException("UPI ID is required");
+        String recipientUpiId = upiId == null || upiId.trim().isEmpty() ? configuredUpiId : upiId;
+        if (recipientUpiId == null || recipientUpiId.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "UPI QR is not configured on the server.");
         }
         Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow();
         BigDecimal payAmount = safeAmount(amount);
         String invoiceNumber = invoice.getInvoiceNumber() == null ? "INV" : invoice.getInvoiceNumber();
-        String fileName = invoiceNumber + "-UPI.png";
 
-        List<InvoiceDocument> existing = invoiceDocumentRepository.findByInvoiceId(invoiceId);
-        for (InvoiceDocument doc : existing) {
-            if (fileName.equalsIgnoreCase(doc.getFileName())) {
-                return doc;
-            }
-        }
-
-        String upiPayload = buildUpiPayload(upiId, payAmount);
+        String upiPayload = buildUpiPayload(recipientUpiId, payAmount);
         byte[] pngBytes = generateQrPng(upiPayload, 200, 200);
         String base64 = Base64.getEncoder().encodeToString(pngBytes);
         String dataUrl = "data:image/png;base64," + base64;
 
         InvoiceDocument doc = new InvoiceDocument();
         doc.setInvoiceId(invoiceId);
-        doc.setFileName(fileName);
+        doc.setFileName(invoiceNumber + "-UPI-" + payAmount.toPlainString() + ".png");
         doc.setFileUrl(dataUrl);
-        return invoiceDocumentRepository.save(doc);
+        return doc;
     }
 
     private void addFeeItem(List<InvoiceItem> items, String type, String description, BigDecimal amount) {
