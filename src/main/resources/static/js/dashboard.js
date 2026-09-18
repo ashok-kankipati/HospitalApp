@@ -1054,23 +1054,16 @@ function updatePaymentMethodUI() {
 
 function updateUpiQrPreview() {
     const qrImg = document.getElementById('upiQrImage');
-    const upiIdInput = document.getElementById('upiId');
     const amountField = document.getElementById('paymentAmount');
-    if (!qrImg || !upiIdInput || !amountField || !currentInvoiceIdForPayment) return;
+    if (!qrImg || !amountField || !currentInvoiceIdForPayment) return;
 
-    if (window.HospitalValidation.message(upiIdInput) || window.HospitalValidation.message(amountField)) return;
-    const upiId = (upiIdInput.value || '').trim();
+    if (window.HospitalValidation.message(amountField)) return;
     const amount = Number(amountField.value || 0).toFixed(2);
-    if (!upiId) {
-        qrImg.src = '';
-        qrImg.alt = 'Enter UPI ID to generate QR';
-        return;
-    }
 
     fetch(`/api/billing/invoices/${currentInvoiceIdForPayment}/upi-qr`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ upiId: upiId, amount: parseFloat(amount) || 0 })
+        body: JSON.stringify({ amount: parseFloat(amount) || 0 })
     })
         .then(async response => {
             if (!response.ok) throw new Error(await hospitalResponseError(response, 'Failed to generate UPI QR'));
@@ -1082,7 +1075,8 @@ function updateUpiQrPreview() {
         })
         .catch(error => {
             console.error('Error generating UPI QR:', error);
-            qrImg.alt = 'Failed to generate QR';
+            qrImg.src = '';
+            qrImg.alt = error.message || 'Failed to generate QR';
         });
 }
 
