@@ -126,7 +126,7 @@ public class NotificationService {
                 sendBrevo(to, subject, body, attachments);
             } else if ("smtp".equalsIgnoreCase(mailProvider)) {
                 MimeMessage message = mailSender.createMimeMessage();
-                MimeMessageHelper helper = new MimeMessageHelper(message, true);
+                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
                 helper.setFrom(fromAddress);
                 helper.setTo(to);
                 helper.setSubject(subject);

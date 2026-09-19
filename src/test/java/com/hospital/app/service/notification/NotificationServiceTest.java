@@ -93,4 +93,50 @@ class NotificationServiceTest {
         verifyNoInteractions(client);
         assertEquals("FAILED", log().getStatus());
     }
+
+    @Test void smtpPreservesUnicodeAndPdfAttachment() throws Exception {
+        var sender = mock(org.springframework.mail.javamail.JavaMailSender.class);
+        var message = new jakarta.mail.internet.MimeMessage(
+                jakarta.mail.Session.getInstance(new java.util.Properties()));
+        when(sender.createMimeMessage()).thenReturn(message);
+        ReflectionTestUtils.setField(service, "mailProvider", "smtp");
+        ReflectionTestUtils.setField(service, "mailSender", sender);
+        String body = "Payment received: \u20B9100";
+        byte[] pdf = new byte[]{1, 2, 3};
+        service.notifyRecipientWithAttachments("patient@example.com", "Invoice", body,
+                List.of(new EmailAttachment("invoice.pdf", pdf, "application/pdf")));
+        verify(sender).send(message);
+        verifyNoInteractions(client);
+        message.saveChanges();
+        var received = new jakarta.mail.internet.MimeMessage(
+                jakarta.mail.Session.getInstance(new java.util.Properties()), serialized(message));
+        assertEquals("patient@example.com", received.getAllRecipients()[0].toString());
+        assertEquals("Invoice", received.getSubject());
+        var mixed = (jakarta.mail.Multipart) received.getContent();
+        var related = (jakarta.mail.Multipart) mixed.getBodyPart(0).getContent();
+        assertEquals(body, related.getBodyPart(0).getContent());
+        assertEquals("invoice.pdf", mixed.getBodyPart(1).getFileName());
+        assertArrayEquals(pdf, mixed.getBodyPart(1).getInputStream().readAllBytes());
+        assertEquals("SENT", log().getStatus());
+    }
+
+    private java.io.InputStream serialized(jakarta.mail.internet.MimeMessage message) throws Exception {
+        var bytes = new ByteArrayOutputStream();
+        message.writeTo(bytes);
+        return new java.io.ByteArrayInputStream(bytes.toByteArray());
+    }
+
+    @Test void smtpFailureIsRecordedWithoutLeakingCredentials() {
+        var sender = mock(org.springframework.mail.javamail.JavaMailSender.class);
+        ReflectionTestUtils.setField(service, "mailProvider", "smtp");
+        ReflectionTestUtils.setField(service, "mailSender", sender);
+        when(sender.createMimeMessage()).thenThrow(
+                new org.springframework.mail.MailAuthenticationException("sensitive-password"));
+        service.notifyRecipientWithAttachments("patient@example.com", "Invoice", "Body", null);
+        var entry = log();
+        assertEquals("FAILED", entry.getStatus());
+        assertFalse(entry.getErrorMessage().contains("sensitive-password"));
+        assertNull(entry.getSentAt());
+        verifyNoInteractions(client);
+    }
 }
