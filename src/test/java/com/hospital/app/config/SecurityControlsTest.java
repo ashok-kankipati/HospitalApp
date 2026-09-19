@@ -38,6 +38,10 @@ class SecurityControlsTest {
         for (String role : new String[]{"Patient", "Superuser", "ADMIN", ""}) assertFalse(ApiPermissions.allows(role, "/api/patients", "GET"));
         assertFalse(ApiPermissions.allows("Doctor", "/api/admin/accounts", "POST"));
         assertFalse(ApiPermissions.allows("Doctor", "/api/billing/invoices/1/payments", "POST"));
+        assertFalse(ApiPermissions.allows("Doctor", "/api/pharmacy/medicines", "GET"));
+        assertFalse(ApiPermissions.allows("Doctor", "/api/lab/orders", "GET"));
+        assertFalse(ApiPermissions.allows("Doctor", "/api/beds/summary", "GET"));
+        assertFalse(ApiPermissions.allows("Doctor", "/api/admissions", "GET"));
         assertFalse(ApiPermissions.allows("Receptionist", "/api/patients/1/medical-history", "GET"));
         assertFalse(ApiPermissions.allows("Pharmacist", "/api/pharmacy/prescriptions", "POST"));
         assertFalse(ApiPermissions.allows("Nurse", "/api/staff/1", "DELETE"));
@@ -45,6 +49,8 @@ class SecurityControlsTest {
         assertTrue(ApiPermissions.allows("Doctor", "/api/visits/1/notes", "PUT"));
         assertTrue(ApiPermissions.allows("Receptionist", "/api/billing/invoices/1/payments", "POST"));
         assertTrue(ApiPermissions.allows("Pharmacist", "/api/pharmacy/dispense", "POST"));
+        assertTrue(ApiPermissions.allows("Lab Technician", "/api/lab/orders", "GET"));
+        assertTrue(ApiPermissions.allows("Receptionist", "/api/beds/summary", "GET"));
         assertTrue(ApiPermissions.allows("Admin", "/api/admin/accounts", "DELETE"));
     }
     @Test void crossSiteFormCannotMutateWithoutCustomHeader() throws Exception {

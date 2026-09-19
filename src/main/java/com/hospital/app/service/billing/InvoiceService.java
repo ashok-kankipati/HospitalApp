@@ -23,6 +23,7 @@ import com.hospital.app.model.lab.LabReport;
 import com.hospital.app.service.notification.NotificationService;
 import com.hospital.app.service.notification.EmailAttachment;
 import com.hospital.app.service.lab.LabService;
+import com.hospital.app.service.document.CareFlowPdfStyle;
 import com.hospital.app.repository.lab.LabOrderItemRepository;
 import com.hospital.app.repository.lab.LabOrderRepository;
 import com.hospital.app.repository.lab.LabTestMasterRepository;
@@ -42,11 +43,8 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.lowagie.text.Document;
-import com.lowagie.text.Element;
-import com.lowagie.text.Font;
+import com.lowagie.text.PageSize;
 import com.lowagie.text.Paragraph;
-import com.lowagie.text.Phrase;
-import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -308,6 +306,7 @@ public class InvoiceService {
                 .stream()
                 .findFirst()
                 .orElse(null);
+        boolean invoiceCreated = false;
 
         if (invoice == null) {
             invoice = new Invoice();
@@ -324,6 +323,7 @@ public class InvoiceService {
             invoice.setIssuedAt(LocalDateTime.now());
             invoice.setDueDate(LocalDate.now().plusDays(7));
             invoice = invoiceRepository.save(invoice);
+            invoiceCreated = true;
         }
 
         List<InvoiceItem> prescriptionCharges = invoiceItemRepository
@@ -363,6 +363,12 @@ public class InvoiceService {
         invoiceItemRepository.save(item);
 
         recalculateInvoiceTotals(invoice);
+        if (invoiceCreated) {
+            String subject = "Billing Reminder";
+            String body = "Invoice created: " + invoice.getInvoiceNumber()
+                    + " Total: " + formatMoney(invoice.getTotal());
+            notificationService.notifyByRole("Billing", "BILLING_REMINDER", subject, body);
+        }
     }
 
     @org.springframework.transaction.annotation.Transactional
@@ -400,67 +406,59 @@ public class InvoiceService {
         }
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        Document document = new Document();
-        PdfWriter.getInstance(document, outputStream);
+        Document document = new Document(PageSize.A4, 42, 42, 46, 54);
+        PdfWriter writer = PdfWriter.getInstance(document, outputStream);
+        CareFlowPdfStyle.apply(writer, "Invoice");
         document.open();
 
-        Font titleFont = new Font(Font.HELVETICA, 16, Font.BOLD);
-        Font headerFont = new Font(Font.HELVETICA, 11, Font.BOLD);
+        document.add(CareFlowPdfStyle.brandHeader("Patient invoice", invoice.getInvoiceNumber(), invoice.getStatus()));
+        document.add(CareFlowPdfStyle.title("Invoice summary"));
 
-        Paragraph title = new Paragraph("Hospital Invoice", titleFont);
-        title.setAlignment(Element.ALIGN_CENTER);
-        document.add(title);
-        document.add(new Paragraph(" "));
+        PdfPTable details = new PdfPTable(2);
+        details.setWidthPercentage(100);
+        details.setWidths(new float[]{1, 1});
+        details.addCell(CareFlowPdfStyle.labelValueCell("Issued", invoice.getIssuedAt() == null ? "" : invoice.getIssuedAt().toLocalDate().toString()));
+        details.addCell(CareFlowPdfStyle.labelValueCell("Due date", invoice.getDueDate() == null ? "" : invoice.getDueDate().toString()));
+        details.addCell(CareFlowPdfStyle.labelValueCell("Patient", patient == null ? "" : patient.getName()));
+        details.addCell(CareFlowPdfStyle.labelValueCell("Appointment", appointment == null ? "" : "A" + String.format("%03d", appointment.getId())));
+        document.add(details);
 
-        document.add(new Paragraph("Invoice #: " + invoice.getInvoiceNumber()));
-        document.add(new Paragraph("Issued: " + (invoice.getIssuedAt() != null ? invoice.getIssuedAt() : "")));
-        document.add(new Paragraph("Status: " + invoice.getStatus()));
-        if (appointment != null) {
-            document.add(new Paragraph("Appointment: A" + String.format("%03d", appointment.getId())));
-        }
-        document.add(new Paragraph(" "));
-
-        if (patient != null) {
-            document.add(new Paragraph("Patient: " + patient.getName()));
-            document.add(new Paragraph("Email: " + patient.getEmail()));
-            document.add(new Paragraph("Phone: " + patient.getPhone()));
-        }
-        document.add(new Paragraph(" "));
+        document.add(CareFlowPdfStyle.section("Charges"));
 
         PdfPTable table = new PdfPTable(5);
         table.setWidthPercentage(100);
         table.setWidths(new float[]{1.5f, 4.5f, 1.2f, 1.6f, 1.6f});
 
-        addHeaderCell(table, "Type", headerFont);
-        addHeaderCell(table, "Description", headerFont);
-        addHeaderCell(table, "Qty", headerFont);
-        addHeaderCell(table, "Unit", headerFont);
-        addHeaderCell(table, "Total", headerFont);
+        table.addCell(CareFlowPdfStyle.headerCell("Type"));
+        table.addCell(CareFlowPdfStyle.headerCell("Description"));
+        table.addCell(CareFlowPdfStyle.headerCell("Qty"));
+        table.addCell(CareFlowPdfStyle.headerCell("Unit"));
+        table.addCell(CareFlowPdfStyle.headerCell("Total"));
 
         for (InvoiceItem item : items) {
-            table.addCell(safeText(item.getItemType()));
-            table.addCell(safeText(item.getDescription()));
-            table.addCell(String.valueOf(item.getQuantity()));
-            table.addCell(formatMoney(item.getUnitPrice()));
-            table.addCell(formatMoney(item.getLineTotal()));
+            table.addCell(CareFlowPdfStyle.dataCell(safeText(item.getItemType())));
+            table.addCell(CareFlowPdfStyle.dataCell(safeText(item.getDescription())));
+            table.addCell(CareFlowPdfStyle.dataCell(String.valueOf(item.getQuantity())));
+            table.addCell(CareFlowPdfStyle.dataCell(formatMoney(item.getUnitPrice())));
+            table.addCell(CareFlowPdfStyle.dataCell(formatMoney(item.getLineTotal())));
         }
 
         document.add(table);
-        document.add(new Paragraph(" "));
 
-        document.add(new Paragraph("Subtotal: " + formatMoney(invoice.getSubtotal())));
-        document.add(new Paragraph("Tax: " + formatMoney(invoice.getTax())));
-        document.add(new Paragraph("Discount: " + formatMoney(invoice.getDiscount())));
-        document.add(new Paragraph("Total: " + formatMoney(invoice.getTotal())));
-        document.add(new Paragraph("Paid: " + formatMoney(invoice.getAmountPaid())));
-        document.add(new Paragraph("Balance Due: " + formatMoney(invoice.getBalanceDue())));
+        document.add(CareFlowPdfStyle.section("Payment summary"));
+        PdfPTable totals = new PdfPTable(3);
+        totals.setWidthPercentage(100);
+        totals.addCell(CareFlowPdfStyle.labelValueCell("Total", formatMoney(invoice.getTotal())));
+        totals.addCell(CareFlowPdfStyle.labelValueCell("Paid", formatMoney(invoice.getAmountPaid())));
+        totals.addCell(CareFlowPdfStyle.labelValueCell("Balance due", formatMoney(invoice.getBalanceDue())));
+        document.add(totals);
 
         if (!payments.isEmpty()) {
-            document.add(new Paragraph(" "));
-            document.add(new Paragraph("Payments", headerFont));
+            document.add(CareFlowPdfStyle.section("Payment history"));
             for (InvoicePayment payment : payments) {
-                document.add(new Paragraph("- " + formatMoney(payment.getAmount()) + " via "
-                        + safeText(payment.getPaymentMethod()) + " (" + safeText(payment.getReference()) + ")"));
+                document.add(new Paragraph(formatMoney(payment.getAmount()) + " · "
+                        + safeText(payment.getPaymentMethod()) + " · " + safeText(payment.getReference()),
+                        CareFlowPdfStyle.BODY_FONT));
             }
         }
 
@@ -511,12 +509,6 @@ public class InvoiceService {
         int year = LocalDate.now().getYear();
         String suffix = UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
         return "INV-" + year + "-" + suffix;
-    }
-
-    private void addHeaderCell(PdfPTable table, String text, Font font) {
-        PdfPCell cell = new PdfPCell(new Phrase(text, font));
-        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        table.addCell(cell);
     }
 
     private String formatMoney(BigDecimal amount) {

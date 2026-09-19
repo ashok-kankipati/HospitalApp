@@ -1,3 +1,10 @@
+.cf-notice-failure { display: block; margin: 7px 0; color: #a33a32; line-height: 1.45; }
+.cf-dialog:has(.cf-pdf-preview) { width: min(94vw, 1100px); max-width: 1100px; padding-bottom: 18px; }
+.cf-pdf-toolbar { min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 0; color: #526a64; font-size: 13px; }
+.cf-pdf-toolbar > span, .cf-pdf-toolbar > div, .cf-pdf-download { display: flex; align-items: center; gap: 8px; }
+.cf-pdf-download { min-height: 36px; padding: 0 14px; border-radius: 6px; background: #0d5c4d; color: #fff; font-weight: 700; text-decoration: none; }
+.cf-pdf-preview { display: block; width: 100%; height: min(72vh, 820px); border: 1px solid #d8e5e1; border-radius: 6px; background: #eef4f2; }
+@media (max-width: 640px) { .cf-pdf-toolbar { align-items: flex-start; flex-direction: column; } .cf-pdf-preview { height: 66vh; } }
 @import "tailwindcss/theme" layer(theme);
 @import "tailwindcss/utilities" layer(utilities);
 @import "../../src/main/resources/static/css/workflow-icons.css";

@@ -895,7 +895,12 @@ function closeViewInvoiceModal() {
 }
 
 function downloadInvoicePdf(invoiceId) {
-    window.open(`/api/billing/invoices/${invoiceId}/pdf`, '_blank');
+    const url = `/api/billing/invoices/${invoiceId}/pdf`;
+    if (window.showCareFlowPdf) {
+        window.showCareFlowPdf(url, `Invoice ${invoiceId}`);
+        return;
+    }
+    window.open(url, '_blank');
 }
 
 function openPaymentModal(invoiceId, balanceDue) {

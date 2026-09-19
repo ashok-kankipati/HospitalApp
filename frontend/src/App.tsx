@@ -26,9 +26,9 @@ function canView(role: string, page: string) {
   if (!['Doctor', 'Surgeon', 'Nurse', 'Receptionist', 'Pharmacist', 'Lab Technician', 'Radiologist'].includes(role)) return false;
   if (['account', 'settings', 'staff'].includes(page)) return false;
   if (page === 'billing') return role === 'Receptionist';
-  if (page === 'pharmacy') return ['Doctor', 'Surgeon', 'Nurse', 'Pharmacist'].includes(role);
-  if (page === 'laboratory') return ['Doctor', 'Surgeon', 'Nurse', 'Lab Technician', 'Radiologist'].includes(role);
-  if (page === 'beds') return ['Doctor', 'Surgeon', 'Nurse', 'Receptionist'].includes(role);
+  if (page === 'pharmacy') return ['Surgeon', 'Nurse', 'Pharmacist'].includes(role);
+  if (page === 'laboratory') return ['Surgeon', 'Nurse', 'Lab Technician', 'Radiologist'].includes(role);
+  if (page === 'beds') return ['Surgeon', 'Nurse', 'Receptionist'].includes(role);
   return true;
 }
 
@@ -95,5 +95,5 @@ function Notifications({ user, onClose }: { user: User; onClose: () => void }) {
   const [error, setError] = useState('');
   const roles = user.role === 'Receptionist' ? ['Receptionist', 'Billing'] : [user.role === 'Lab Technician' ? 'Lab' : user.role];
   const notices = query.data?.filter(n => user.role === 'Admin' || roles.includes(n.role)) ?? [];
-  return <section className="cf-notifications" aria-label="Notifications"><div className="cf-panel-heading"><h2>Notifications</h2><button className="cf-icon-button" onClick={onClose} aria-label="Close notifications"><X size={18} /></button></div>{(query.isError || error) && <ErrorState message={error || 'Could not load notifications.'} retry={() => void query.refetch()} />}{query.isPending ? <div className="cf-empty"><Spinner /></div> : !notices.length ? <Empty title="You’re all caught up">Your team’s notifications will appear here.</Empty> : <div className="cf-notice-list">{notices.map(n => <div key={n.id} className={n.isRead ? 'cf-notice-read' : ''}><Activity size={17} /><span><strong>{n.eventType || n.role}</strong><p>{n.subject}</p>{!n.isRead && <button className="cf-text-button" onClick={() => void api(`/notifications/queue/${n.id}/read`, { method: 'PUT' }).catch(e => setError(e.message))}>Mark as read</button>}</span></div>)}</div>}</section>;
+  return <section className="cf-notifications" aria-label="Notifications"><div className="cf-panel-heading"><h2>Notifications</h2><button className="cf-icon-button" onClick={onClose} aria-label="Close notifications"><X size={18} /></button></div>{(query.isError || error) && <ErrorState message={error || 'Could not load notifications.'} retry={() => void query.refetch()} />}{query.isPending ? <div className="cf-empty"><Spinner /></div> : !notices.length ? <Empty title="You’re all caught up">Your team’s notifications will appear here.</Empty> : <div className="cf-notice-list">{notices.map(n => <div key={n.id} className={n.isRead ? 'cf-notice-read' : ''}><Activity size={17} /><span><strong>{n.eventType || n.role}</strong><p>{n.subject}</p>{n.status === 'FAILED' && n.failureReason && <small className="cf-notice-failure">{n.failureReason}</small>}{!n.isRead && <button className="cf-text-button" onClick={() => void api(`/notifications/queue/${n.id}/read`, { method: 'PUT' }).catch(e => setError(e.message))}>Mark as read</button>}</span></div>)}</div>}</section>;
 }

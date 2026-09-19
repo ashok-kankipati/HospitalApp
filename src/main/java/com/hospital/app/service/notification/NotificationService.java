@@ -41,6 +41,9 @@ public class NotificationService {
     @Autowired
     private JavaMailSender mailSender;
 
+    @Autowired
+    private RoleEmailTemplate emailTemplate;
+
     @Value("${hospital.mail.from:no-reply@example.com}")
     private String fromAddress;
 
@@ -52,6 +55,12 @@ public class NotificationService {
 
     @Value("${hospital.mail.brevo-api-key:}")
     private String brevoApiKey;
+
+    @Value("${spring.mail.username:}")
+    private String mailUsername;
+
+    @Value("${spring.mail.password:}")
+    private String mailPassword;
 
     private HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10)).build();
@@ -72,18 +81,29 @@ public class NotificationService {
     }
 
     public void notifyByRole(String role, String eventType, String subject, String body) {
-        if (!isEnabled(role, eventType, "EMAIL")) {
+        String mappedRole = mapRole(role);
+        if (!isEnabled(mappedRole, eventType, "EMAIL")) {
             return;
         }
-        String mappedRole = mapRole(role);
         List<User> recipients = userRepository.findByRole(mappedRole);
+        RoleEmailTemplate.EmailContent content = emailTemplate.render(mappedRole, eventType, subject, body);
         for (User user : recipients) {
-            sendEmail(role, eventType, user.getEmail(), subject, body);
+            sendEmail(role, eventType, user.getEmail(), content);
         }
     }
 
+    public void notifyRecipientByRole(String role, String eventType, String recipient, String subject, String body) {
+        String mappedRole = mapRole(role);
+        if (recipient == null || recipient.isBlank() || !isEnabled(mappedRole, eventType, "EMAIL")) {
+            return;
+        }
+        RoleEmailTemplate.EmailContent content = emailTemplate.render(mappedRole, eventType, subject, body);
+        sendEmail(role, eventType, recipient, content);
+    }
+
     public void notifyRecipientWithAttachments(String recipient, String subject, String body, List<EmailAttachment> attachments) {
-        sendEmailWithAttachments("Patient", "BILLING_PAID", recipient, subject, body, attachments);
+        RoleEmailTemplate.EmailContent content = emailTemplate.render("Patient", "BILLING_PAID", subject, body);
+        sendEmailWithAttachments("Patient", "BILLING_PAID", recipient, content, attachments);
     }
 
     private String mapRole(String role) {
@@ -97,24 +117,34 @@ public class NotificationService {
     }
 
     private boolean isEnabled(String role, String eventType, String channel) {
-        return settingRepository
-                .findByRoleAndEventTypeAndChannel(role, eventType, channel)
-                .map(NotificationSetting::getEnabled)
-                .orElse(true);
+        java.util.List<String> candidateRoles = java.util.stream.Stream
+                .of(role, mapRole(role))
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .toList();
+
+        for (String candidate : candidateRoles) {
+            var setting = settingRepository.findByRoleAndEventTypeAndChannel(candidate, eventType, channel);
+            if (setting.isPresent()) {
+                return setting.get().getEnabled();
+            }
+        }
+        return true;
     }
 
-    private void sendEmail(String role, String eventType, String to, String subject, String body) {
-        sendEmailWithAttachments(role, eventType, to, subject, body, List.of());
+    private void sendEmail(String role, String eventType, String to, RoleEmailTemplate.EmailContent content) {
+        sendEmailWithAttachments(role, eventType, to, content, List.of());
     }
 
-    private void sendEmailWithAttachments(String role, String eventType, String to, String subject, String body, List<EmailAttachment> attachments) {
+    private void sendEmailWithAttachments(String role, String eventType, String to,
+                                          RoleEmailTemplate.EmailContent content, List<EmailAttachment> attachments) {
         NotificationQueue log = new NotificationQueue();
         log.setRole(role);
         log.setEventType(eventType);
         log.setChannel("EMAIL");
         log.setRecipient(to);
-        log.setSubject(subject);
-        log.setBody(body);
+        log.setSubject(content.subject());
+        log.setBody(content.plainText());
 
         try {
             if (!mailEnabled) {
@@ -123,14 +153,15 @@ public class NotificationService {
                 return;
             }
             if ("brevo".equalsIgnoreCase(mailProvider)) {
-                sendBrevo(to, subject, body, attachments);
+                sendBrevo(to, content, attachments);
             } else if ("smtp".equalsIgnoreCase(mailProvider)) {
+                validateSmtpConfiguration();
                 MimeMessage message = mailSender.createMimeMessage();
                 MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
                 helper.setFrom(fromAddress);
                 helper.setTo(to);
-                helper.setSubject(subject);
-                helper.setText(body, false);
+                helper.setSubject(content.subject());
+                helper.setText(content.plainText(), content.html());
                 if (attachments != null) {
                     for (EmailAttachment attachment : attachments) {
                         if (attachment == null || attachment.getContent() == null) {
@@ -153,13 +184,41 @@ public class NotificationService {
             log.setErrorMessage("Email submission interrupted; check provider logs before retrying.");
         } catch (Exception e) {
             log.setStatus("FAILED");
-            // Do not persist provider response bodies, credentials or patient data in errors.
-            log.setErrorMessage(e instanceof IllegalStateException ? e.getMessage()
-                    : "Email submission failed; check mail configuration and provider logs before retrying.");
+            log.setErrorMessage(classifyFailure(e));
         }
         queueRepository.save(log);
     }
-    private void sendBrevo(String to, String subject, String body, List<EmailAttachment> attachments)
+
+    private void validateSmtpConfiguration() {
+        if (mailUsername == null || mailUsername.isBlank() || mailPassword == null || mailPassword.isBlank()) {
+            throw new IllegalStateException("SMTP credentials are missing. Configure MAIL_USERNAME and MAIL_PASSWORD.");
+        }
+        if (fromAddress == null || fromAddress.isBlank()) {
+            throw new IllegalStateException("SMTP sender is missing. Configure MAIL_FROM.");
+        }
+    }
+
+    private String classifyFailure(Exception exception) {
+        if (exception instanceof IllegalStateException) {
+            return exception.getMessage();
+        }
+        if (exception instanceof org.springframework.mail.MailAuthenticationException) {
+            return "SMTP authentication failed. Check MAIL_USERNAME and the provider app password.";
+        }
+        String message = exception.getMessage() == null ? "" : exception.getMessage().toLowerCase(java.util.Locale.ROOT);
+        if (message.contains("timeout") || message.contains("connect")) {
+            return "Could not connect to the mail provider. Check MAIL_HOST, MAIL_PORT and network access.";
+        }
+        if (message.contains("sender") || message.contains("from address")) {
+            return "The mail provider rejected MAIL_FROM. Use the authenticated sender or a verified alias.";
+        }
+        if (message.contains("recipient") || message.contains("address")) {
+            return "The mail provider rejected the recipient address.";
+        }
+        return "Email submission failed. Check the mail provider logs and configured credentials.";
+    }
+
+    private void sendBrevo(String to, RoleEmailTemplate.EmailContent content, List<EmailAttachment> attachments)
             throws Exception {
         if (brevoApiKey == null || brevoApiKey.isBlank()) {
             throw new IllegalStateException("BREVO_API_KEY is missing.");
@@ -172,8 +231,9 @@ public class NotificationService {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("sender", sender);
         payload.put("to", List.of(Map.of("email", to)));
-        payload.put("subject", subject);
-        payload.put("textContent", body);
+        payload.put("subject", content.subject());
+        payload.put("textContent", content.plainText());
+        payload.put("htmlContent", content.html());
         List<Map<String, String>> files = new ArrayList<>();
         if (attachments != null) {
             for (EmailAttachment attachment : attachments) {

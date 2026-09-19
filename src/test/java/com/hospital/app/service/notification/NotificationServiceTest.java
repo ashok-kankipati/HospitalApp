@@ -1,7 +1,10 @@
 package com.hospital.app.service.notification;
 
 import com.hospital.app.model.notification.NotificationQueue;
+import com.hospital.app.model.User;
 import com.hospital.app.repository.notification.NotificationQueueRepository;
+import com.hospital.app.repository.notification.NotificationSettingRepository;
+import com.hospital.app.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,16 +24,25 @@ class NotificationServiceTest {
     private NotificationService service;
     private HttpClient client;
     private NotificationQueueRepository queue;
+    private NotificationSettingRepository settings;
+    private UserRepository users;
 
     @BeforeEach void setup() {
         service = new NotificationService();
         client = mock(HttpClient.class);
         queue = mock(NotificationQueueRepository.class);
+        settings = mock(NotificationSettingRepository.class);
+        users = mock(UserRepository.class);
         ReflectionTestUtils.setField(service, "httpClient", client);
         ReflectionTestUtils.setField(service, "queueRepository", queue);
+        ReflectionTestUtils.setField(service, "settingRepository", settings);
+        ReflectionTestUtils.setField(service, "userRepository", users);
+        ReflectionTestUtils.setField(service, "emailTemplate", new RoleEmailTemplate());
         ReflectionTestUtils.setField(service, "mailEnabled", true);
         ReflectionTestUtils.setField(service, "mailProvider", "brevo");
         ReflectionTestUtils.setField(service, "brevoApiKey", "test-key");
+        ReflectionTestUtils.setField(service, "mailUsername", "sender@example.com");
+        ReflectionTestUtils.setField(service, "mailPassword", "app-password");
         ReflectionTestUtils.setField(service, "fromAddress", "CareFlow <sender@example.com>");
     }
 
@@ -62,7 +74,8 @@ class NotificationServiceTest {
         assertEquals("sender@example.com", payload.at("/sender/email").asText());
         assertEquals("CareFlow", payload.at("/sender/name").asText());
         assertEquals("patient@example.com", payload.at("/to/0/email").asText());
-        assertEquals("Hello ?", payload.path("textContent").asText());
+        assertTrue(payload.path("textContent").asText().contains("Hello ?"));
+        assertTrue(payload.path("htmlContent").asText().contains("Billing update"));
         assertEquals("AQID", payload.at("/attachment/0/content").asText());
         assertEquals("invoice.pdf", payload.at("/attachment/0/name").asText());
         assertEquals("SENT", log().getStatus());
@@ -94,6 +107,58 @@ class NotificationServiceTest {
         assertEquals("FAILED", log().getStatus());
     }
 
+    @Test void mappedRolesUseActualRecipientRolesForNotificationSettings() throws Exception {
+        var labSetting = new com.hospital.app.model.notification.NotificationSetting();
+        labSetting.setRole("Lab Technician");
+        labSetting.setEventType("LAB_REPORT_READY");
+        labSetting.setChannel("EMAIL");
+        labSetting.setEnabled(true);
+        when(settings.findByRoleAndEventTypeAndChannel("Lab Technician", "LAB_REPORT_READY", "EMAIL"))
+                .thenReturn(java.util.Optional.of(labSetting));
+
+        var labUser = new User();
+        labUser.setEmail("lab@example.com");
+        when(users.findByRole("Lab Technician")).thenReturn(List.of(labUser));
+
+        var billingSetting = new com.hospital.app.model.notification.NotificationSetting();
+        billingSetting.setRole("Receptionist");
+        billingSetting.setEventType("BILLING_REMINDER");
+        billingSetting.setChannel("EMAIL");
+        billingSetting.setEnabled(true);
+        when(settings.findByRoleAndEventTypeAndChannel("Receptionist", "BILLING_REMINDER", "EMAIL"))
+                .thenReturn(java.util.Optional.of(billingSetting));
+
+        var receptionist = new User();
+        receptionist.setEmail("reception@example.com");
+        when(users.findByRole("Receptionist")).thenReturn(List.of(receptionist));
+
+        HttpResponse<Void> response = mock(HttpResponse.class);
+        when(response.statusCode()).thenReturn(201);
+        when(client.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn(response);
+
+        service.notifyByRole("Lab", "LAB_REPORT_READY", "Lab Report Ready", "Body");
+        service.notifyByRole("Billing", "BILLING_REMINDER", "Billing Reminder", "Body");
+
+        verify(settings).findByRoleAndEventTypeAndChannel("Lab Technician", "LAB_REPORT_READY", "EMAIL");
+        verify(settings).findByRoleAndEventTypeAndChannel("Receptionist", "BILLING_REMINDER", "EMAIL");
+        verify(users).findByRole("Lab Technician");
+        verify(users).findByRole("Receptionist");
+    }
+
+    @Test void roleTemplatesProvideDifferentClinicalActionsAndEscapeContent() {
+        var template = new RoleEmailTemplate();
+        var doctor = template.render("Doctor", "LAB_REPORT_READY", "Old subject", "Visit <V001> is ready.");
+        var lab = template.render("Lab Technician", "LAB_REPORT_READY", "Old subject", "Visit <V001> is ready.");
+        var billing = template.render("Receptionist", "BILLING_REMINDER", "Old subject", "Invoice INV-1 was created.");
+
+        assertEquals("Lab report ready for review", doctor.subject());
+        assertTrue(doctor.plainText().contains("update the patient care plan"));
+        assertTrue(lab.plainText().contains("Confirm the report is complete"));
+        assertEquals("New invoice ready for billing", billing.subject());
+        assertTrue(doctor.html().contains("Visit &lt;V001&gt; is ready."));
+        assertFalse(doctor.html().contains("Visit <V001>"));
+    }
+
     @Test void smtpPreservesUnicodeAndPdfAttachment() throws Exception {
         var sender = mock(org.springframework.mail.javamail.JavaMailSender.class);
         var message = new jakarta.mail.internet.MimeMessage(
@@ -114,7 +179,9 @@ class NotificationServiceTest {
         assertEquals("Invoice", received.getSubject());
         var mixed = (jakarta.mail.Multipart) received.getContent();
         var related = (jakarta.mail.Multipart) mixed.getBodyPart(0).getContent();
-        assertEquals(body, related.getBodyPart(0).getContent());
+        var alternative = (jakarta.mail.Multipart) related.getBodyPart(0).getContent();
+        assertTrue(alternative.getBodyPart(0).getContent().toString().contains(body));
+        assertTrue(alternative.getBodyPart(1).getContent().toString().contains("Billing update"));
         assertEquals("invoice.pdf", mixed.getBodyPart(1).getFileName());
         assertArrayEquals(pdf, mixed.getBodyPart(1).getInputStream().readAllBytes());
         assertEquals("SENT", log().getStatus());
@@ -138,5 +205,17 @@ class NotificationServiceTest {
         assertFalse(entry.getErrorMessage().contains("sensitive-password"));
         assertNull(entry.getSentAt());
         verifyNoInteractions(client);
+    }
+
+    @Test void missingSmtpCredentialsRecordsActionableSafeReason() {
+        ReflectionTestUtils.setField(service, "mailProvider", "smtp");
+        ReflectionTestUtils.setField(service, "mailUsername", "");
+        ReflectionTestUtils.setField(service, "mailPassword", "");
+
+        service.notifyRecipientWithAttachments("patient@example.com", "Invoice", "Body", null);
+
+        var entry = log();
+        assertEquals("FAILED", entry.getStatus());
+        assertEquals("SMTP credentials are missing. Configure MAIL_USERNAME and MAIL_PASSWORD.", entry.getFailureReason());
     }
 }

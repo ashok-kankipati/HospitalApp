@@ -50,6 +50,11 @@ public class NotificationQueue {
     @com.fasterxml.jackson.annotation.JsonIgnore
     private String errorMessage;
 
+    @com.fasterxml.jackson.annotation.JsonProperty("failureReason")
+    public String getFailureReason() {
+        return "FAILED".equals(status) ? errorMessage : null;
+    }
+
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {
