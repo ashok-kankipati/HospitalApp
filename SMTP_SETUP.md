@@ -12,6 +12,18 @@ MAIL_PASSWORD=<new Gmail app password>
 MAIL_FROM=<same sending Gmail address>
 ```
 
+Spring Boot variable names are also supported when already configured:
+
+```text
+SPRING_MAIL_HOST=smtp.gmail.com
+SPRING_MAIL_PORT=587
+SPRING_MAIL_USERNAME=<sending Gmail address>
+SPRING_MAIL_PASSWORD=<Gmail app password>
+MAIL_FROM=<same sending Gmail address>
+```
+
+Use one naming set consistently. Do not configure both sets with different values.
+
 Replace an existing MAIL_PROVIDER=brevo value; environment overrides the default.
 Remove BREVO_API_KEY if it is no longer used. Save and redeploy the web service.
 Use a paid web service instance, not just a paid database or workspace.

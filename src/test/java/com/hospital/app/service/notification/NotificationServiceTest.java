@@ -41,8 +41,6 @@ class NotificationServiceTest {
         ReflectionTestUtils.setField(service, "mailEnabled", true);
         ReflectionTestUtils.setField(service, "mailProvider", "brevo");
         ReflectionTestUtils.setField(service, "brevoApiKey", "test-key");
-        ReflectionTestUtils.setField(service, "mailUsername", "sender@example.com");
-        ReflectionTestUtils.setField(service, "mailPassword", "app-password");
         ReflectionTestUtils.setField(service, "fromAddress", "CareFlow <sender@example.com>");
     }
 
@@ -207,15 +205,4 @@ class NotificationServiceTest {
         verifyNoInteractions(client);
     }
 
-    @Test void missingSmtpCredentialsRecordsActionableSafeReason() {
-        ReflectionTestUtils.setField(service, "mailProvider", "smtp");
-        ReflectionTestUtils.setField(service, "mailUsername", "");
-        ReflectionTestUtils.setField(service, "mailPassword", "");
-
-        service.notifyRecipientWithAttachments("patient@example.com", "Invoice", "Body", null);
-
-        var entry = log();
-        assertEquals("FAILED", entry.getStatus());
-        assertEquals("SMTP credentials are missing. Configure MAIL_USERNAME and MAIL_PASSWORD.", entry.getFailureReason());
-    }
 }

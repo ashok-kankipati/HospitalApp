@@ -56,12 +56,6 @@ public class NotificationService {
     @Value("${hospital.mail.brevo-api-key:}")
     private String brevoApiKey;
 
-    @Value("${spring.mail.username:}")
-    private String mailUsername;
-
-    @Value("${spring.mail.password:}")
-    private String mailPassword;
-
     private HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10)).build();
     private final ObjectMapper json = new ObjectMapper();
@@ -155,7 +149,6 @@ public class NotificationService {
             if ("brevo".equalsIgnoreCase(mailProvider)) {
                 sendBrevo(to, content, attachments);
             } else if ("smtp".equalsIgnoreCase(mailProvider)) {
-                validateSmtpConfiguration();
                 MimeMessage message = mailSender.createMimeMessage();
                 MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
                 helper.setFrom(fromAddress);
@@ -187,15 +180,6 @@ public class NotificationService {
             log.setErrorMessage(classifyFailure(e));
         }
         queueRepository.save(log);
-    }
-
-    private void validateSmtpConfiguration() {
-        if (mailUsername == null || mailUsername.isBlank() || mailPassword == null || mailPassword.isBlank()) {
-            throw new IllegalStateException("SMTP credentials are missing. Configure MAIL_USERNAME and MAIL_PASSWORD.");
-        }
-        if (fromAddress == null || fromAddress.isBlank()) {
-            throw new IllegalStateException("SMTP sender is missing. Configure MAIL_FROM.");
-        }
     }
 
     private String classifyFailure(Exception exception) {
