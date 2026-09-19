@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
+import { Download, ExternalLink, FileText } from 'lucide-react';
 import template from '../../src/main/resources/static/workflows/dashboard.html?raw';
-import { ErrorState } from './ui';
+import { ErrorState, Modal } from './ui';
 
 declare global {
   interface Window {
     initializeHospitalDashboard: () => Promise<void>;
     openScheduleAppointmentModal: () => void;
     openConsultation: (id: number) => void;
+    showCareFlowPdf?: (url: string, title: string) => void;
   }
 }
 let initialized: Promise<void> | undefined;
@@ -35,6 +37,7 @@ export default function LegacyWorkspace({ section, onReady }: { section: string;
   const host = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState('');
+  const [pdf, setPdf] = useState<{ url: string; title: string }>();
   useEffect(() => {
     const page = new DOMParser().parseFromString(template, 'text/html');
     page.querySelectorAll('script').forEach(script => script.remove());
@@ -54,7 +57,15 @@ export default function LegacyWorkspace({ section, onReady }: { section: string;
     });
     host.current!.innerHTML = page.body.innerHTML;
     // Keep original workflow logic in one source until each clinical module is migrated.
+    window.showCareFlowPdf = (url, title) => setPdf({ url, title });
     void initialize().then(() => { setReady(true); onReady(); }).catch(e => setError(e.message));
+    const previewPdf = (event: MouseEvent) => {
+      const link = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[href*="/pdf"]');
+      if (!link || !host.current?.contains(link)) return;
+      event.preventDefault();
+      setPdf({ url: link.href, title: link.textContent?.trim() || 'Clinical document' });
+    };
+    host.current!.addEventListener('click', previewPdf, true);
     let current: HTMLElement | null = null;
     let previous: HTMLElement | null = null;
     const observer = new MutationObserver(() => {
@@ -78,11 +89,16 @@ export default function LegacyWorkspace({ section, onReady }: { section: string;
       }
     };
     document.addEventListener('keydown', keyboard);
-    return () => { observer.disconnect(); document.removeEventListener('keydown', keyboard); };
+    return () => {
+      observer.disconnect();
+      document.removeEventListener('keydown', keyboard);
+      host.current?.removeEventListener('click', previewPdf, true);
+      delete window.showCareFlowPdf;
+    };
   }, []);
   useEffect(() => {
     if (!ready) return;
     host.current?.querySelector<HTMLAnchorElement>(`.nav-item[data-section="${section}"]`)?.click();
   }, [section, ready]);
-  return <>{error && <ErrorState message={error} />}<div id="legacy-workspace" ref={host} className={['overview', 'patients', 'account'].includes(section) ? 'cf-workflows cf-workflows-hidden' : 'cf-workflows'} aria-busy={!ready} /></>;
+  return <>{error && <ErrorState message={error} />}<div id="legacy-workspace" ref={host} className={['overview', 'patients', 'account'].includes(section) ? 'cf-workflows cf-workflows-hidden' : 'cf-workflows'} aria-busy={!ready} />{pdf && <Modal title={pdf.title} subtitle="Secure CareFlow PDF preview" onClose={() => setPdf(undefined)}><div className="cf-pdf-toolbar"><span><FileText size={18} /> Watermarked clinical document</span><div><a className="cf-icon-button" href={pdf.url} target="_blank" rel="noopener" title="Open in new tab" aria-label="Open PDF in new tab"><ExternalLink size={18} /></a><a className="cf-pdf-download" href={pdf.url} download><Download size={17} /> Download</a></div></div><iframe className="cf-pdf-preview" src={pdf.url} title={`${pdf.title} PDF preview`} /></Modal>}</>;
 }

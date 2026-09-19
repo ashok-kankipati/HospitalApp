@@ -21,6 +21,7 @@ public class AccountService {
             @Email @com.hospital.app.validation.InputText(kind="email", required=true, max=254) String email,
             @NotBlank @Size(min=8, max=72) String password, @NotBlank String role) {}
     public record ChangeRole(@NotBlank String role) {}
+    public record ResetPassword(@NotBlank @Size(min=8, max=72) String password) {}
     public record Account(Long id, String username, String email, String role, boolean active, String createdAt) {
         static Account from(User user) { return new Account(user.getId(), user.getUsername(), user.getEmail(), user.getRole(), Boolean.TRUE.equals(user.getIsActive()), user.getCreatedAt()); }
     }
@@ -73,6 +74,16 @@ public class AccountService {
         if ("Admin".equals(user.getRole()) && Boolean.TRUE.equals(user.getIsActive()) && !"Admin".equals(role) && admins.size() <= 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "Keep at least one active administrator.");
         user.setRole(role);
         return Account.from(users.save(user));
+    }
+
+    @Transactional
+    public void resetPassword(Long actorId, Long id, String password) {
+        requireAdmin(actorId);
+        User user = users.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found."));
+        if (password.getBytes(StandardCharsets.UTF_8).length > 72)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password must be at most 72 UTF-8 bytes.");
+        user.setPassword(AccountPasswords.encode(password));
+        users.save(user);
     }
 
     @Transactional

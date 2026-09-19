@@ -174,8 +174,14 @@
             <div id="appointmentsSection" class="content-section">
                 <h1>Appointments Management</h1>
                 <button class="btn-primary" onclick="openScheduleAppointmentModal()">Schedule Appointment</button>
+                <div class="appointment-filters" role="search" aria-label="Filter appointments">
+                    <label><span class="appointment-filter-label"><span aria-hidden="true">&#128197;</span>Date</span><input type="date" id="appointmentFilterDate"></label>
+                    <label><span class="appointment-filter-label"><span aria-hidden="true">&#128100;</span>Doctor</span><select id="appointmentFilterDoctor"><option value="">All doctors</option></select></label>
+                    <label><span class="appointment-filter-label"><span aria-hidden="true">&#9679;</span>Status</span><select id="appointmentFilterStatus"><option value="">All statuses</option><option value="PENDING">Pending</option><option value="CONFIRMED">Confirmed</option><option value="COMPLETED">Completed</option><option value="CANCELLED">Cancelled</option><option value="NO_SHOW">No show</option></select></label>
+                    <button type="button" class="btn-secondary" id="clearAppointmentFilters">Clear filters</button>
+                </div>
                 <div class="table-container">
-                    <table class="data-table">
+                    <table class="data-table" id="appointmentsTable">
                         <thead>
                             <tr>
                                 <th>Appointment ID</th>

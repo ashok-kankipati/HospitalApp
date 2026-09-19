@@ -61,14 +61,18 @@ public class LabController {
     }
 
     @PostMapping("/reports")
-    public ResponseEntity<LabReport> addReport(@jakarta.validation.Valid @RequestBody LabReportRequest request) {
+    public ResponseEntity<LabReport> addReport(@jakarta.validation.Valid @RequestBody LabReportRequest request,
+                                               jakarta.servlet.http.HttpServletRequest httpRequest) {
         LabReport report = new LabReport();
         report.setVisitId(request.getVisitId());
         report.setLabOrderId(request.getLabOrderId());
         report.setFileName(request.getFileName());
         report.setFileUrl(request.getFileUrl());
         report.setMimeType(request.getMimeType());
-        return ResponseEntity.ok(labService.addReport(report));
+        var actor = (com.hospital.app.dto.LoginResponse) httpRequest.getSession()
+            .getAttribute(com.hospital.app.controller.LoginController.AUTHENTICATED_USER);
+        String performedBy = actor == null ? "Lab team" : actor.getUsername() + " (" + actor.getRole() + ")";
+        return ResponseEntity.ok(labService.addReport(report, performedBy));
     }
 
     @PutMapping("/order-items/{id}")

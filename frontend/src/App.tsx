@@ -26,9 +26,9 @@ function canView(role: string, page: string) {
   if (!['Doctor', 'Surgeon', 'Nurse', 'Receptionist', 'Pharmacist', 'Lab Technician', 'Radiologist'].includes(role)) return false;
   if (['account', 'settings', 'staff'].includes(page)) return false;
   if (page === 'billing') return role === 'Receptionist';
-  if (page === 'pharmacy') return ['Doctor', 'Surgeon', 'Nurse', 'Pharmacist'].includes(role);
-  if (page === 'laboratory') return ['Doctor', 'Surgeon', 'Nurse', 'Lab Technician', 'Radiologist'].includes(role);
-  if (page === 'beds') return ['Doctor', 'Surgeon', 'Nurse', 'Receptionist'].includes(role);
+  if (page === 'pharmacy') return ['Surgeon', 'Nurse', 'Pharmacist'].includes(role);
+  if (page === 'laboratory') return ['Surgeon', 'Nurse', 'Lab Technician', 'Radiologist'].includes(role);
+  if (page === 'beds') return ['Surgeon', 'Nurse', 'Receptionist'].includes(role);
   return true;
 }
 
@@ -43,6 +43,7 @@ export default function App() {
   const [clinicalStarted, setClinicalStarted] = useState(() => route() !== 'account');
   useEffect(() => { if (section !== 'account') setClinicalStarted(true); }, [section]);
   const [toast, setToast] = useState(''); const [loggingOut, setLoggingOut] = useState(false);
+  const notificationQuery = useQuery({ queryKey: ['notifications'], queryFn: () => api<Notice[]>('/notifications/queue'), enabled: Boolean(user), refetchInterval: 30000 });
   const duoFailed = new URLSearchParams(location.hash.split('?')[1] || location.search).get('duo') === 'failed';
   const navigate = useCallback((page: string) => { location.hash = `/${page}`; setSection(page); setMobile(false); }, []);
   const acceptUser = (value: User) => { localStorage.setItem('user', JSON.stringify(value)); setUser(value); navigate('overview'); };
@@ -67,6 +68,16 @@ export default function App() {
       navigate('overview');
     }
   }, [section, user, navigate]);
+  const notificationRoles = user?.role === 'Receptionist' ? ['Receptionist', 'Billing'] : [user?.role === 'Lab Technician' ? 'Lab' : user?.role];
+  const visibleNotices = notificationQuery.data?.filter(n => user?.role === 'Admin' || notificationRoles.includes(n.role)) ?? [];
+  const unreadNotifications = visibleNotices.filter(n => !n.isRead).length;
+  useEffect(() => {
+    const bell = document.querySelector<HTMLButtonElement>('.cf-bell');
+    if (!bell) return;
+    bell.dataset.count = unreadNotifications > 99 ? '99+' : String(unreadNotifications);
+    bell.classList.toggle('cf-bell-has-count', unreadNotifications > 0);
+    bell.setAttribute('aria-label', `${unreadNotifications} unread notifications`);
+  }, [unreadNotifications]);
   async function logout() { setLoggingOut(true); try { await api('/auth/logout', { method: 'POST' }); localStorage.removeItem('user'); queryClient.clear(); location.replace('/app/#/login'); location.reload(); } catch (e) { setToast((e as Error).message); setLoggingOut(false); } }
   if (checking) return <main className="cf-boot"><Brand /><Spinner /><p>Opening your workspace…</p></main>;
   if (sessionError) return <main className="cf-boot"><Brand /><ErrorState message={sessionError} retry={() => location.reload()} /></main>;
@@ -91,9 +102,23 @@ function CommandPalette({ role, navigate, onClose }: { role: string; navigate: (
 }
 
 function Notifications({ user, onClose }: { user: User; onClose: () => void }) {
-  const query = useQuery({ queryKey: ['notifications'], queryFn: () => api<Notice[]>('/notifications/queue') });
+  const query = useQuery({ queryKey: ['notifications'], queryFn: () => api<Notice[]>('/notifications/queue'), refetchInterval: 30000 });
   const [error, setError] = useState('');
   const roles = user.role === 'Receptionist' ? ['Receptionist', 'Billing'] : [user.role === 'Lab Technician' ? 'Lab' : user.role];
   const notices = query.data?.filter(n => user.role === 'Admin' || roles.includes(n.role)) ?? [];
-  return <section className="cf-notifications" aria-label="Notifications"><div className="cf-panel-heading"><h2>Notifications</h2><button className="cf-icon-button" onClick={onClose} aria-label="Close notifications"><X size={18} /></button></div>{(query.isError || error) && <ErrorState message={error || 'Could not load notifications.'} retry={() => void query.refetch()} />}{query.isPending ? <div className="cf-empty"><Spinner /></div> : !notices.length ? <Empty title="You’re all caught up">Your team’s notifications will appear here.</Empty> : <div className="cf-notice-list">{notices.map(n => <div key={n.id} className={n.isRead ? 'cf-notice-read' : ''}><Activity size={17} /><span><strong>{n.eventType || n.role}</strong><p>{n.subject}</p>{!n.isRead && <button className="cf-text-button" onClick={() => void api(`/notifications/queue/${n.id}/read`, { method: 'PUT' }).catch(e => setError(e.message))}>Mark as read</button>}</span></div>)}</div>}</section>;
+  const unread = notices.filter(n => !n.isRead).length;
+  const ist = (value?: string) => value ? new Intl.DateTimeFormat('en-IN', {
+    dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata'
+  }).format(new Date(value.endsWith('Z') ? value : `${value}Z`)) + ' IST' : 'Time unavailable';
+  const markRead = (id: number) => void api(`/notifications/queue/${id}/read`, { method: 'PUT' })
+    .then(() => queryClient.setQueryData<Notice[]>(['notifications'], current => current?.map(item => item.id === id ? { ...item, isRead: true } : item)))
+    .catch(e => setError(e.message));
+
+  return <section className="cf-notifications" aria-label="Notifications">
+    <div className="cf-panel-heading"><div><h2>Notifications</h2><p>{unread} unread · {notices.length} total</p></div><button className="cf-icon-button" onClick={onClose} aria-label="Close notifications"><X size={18} /></button></div>
+    {(query.isError || error) && <ErrorState message={error || 'Could not load notifications.'} retry={() => void query.refetch()} />}
+    {query.isPending ? <div className="cf-empty"><Spinner /></div> : !notices.length ? <Empty title="You’re all caught up">Your team’s notifications will appear here.</Empty> : <div className="cf-notice-list">{notices.map(n => <article key={n.id} className={n.isRead ? 'cf-notice-read' : 'cf-notice-unread'}>
+      <Activity size={17} /><div className="cf-notice-content"><div className="cf-notice-title"><strong>{n.subject}</strong>{!n.isRead && <span>New</span>}</div><time>{ist(n.createdAt)}</time>{n.details && <p className="cf-notice-details">{n.details}</p>}{n.status === 'FAILED' && n.failureReason && <small className="cf-notice-failure">{n.failureReason}</small>}{!n.isRead && <button className="cf-text-button" onClick={() => markRead(n.id)}>Mark as read</button>}</div>
+    </article>)}</div>}
+  </section>;
 }

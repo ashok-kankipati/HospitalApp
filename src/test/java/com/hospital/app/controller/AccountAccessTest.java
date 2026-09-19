@@ -57,4 +57,25 @@ class AccountAccessTest {
         assertFalse(AccountPasswords.matches("incorrect", captured.getValue().getPassword()));
         assertThrows(ResponseStatusException.class, () -> service.create(1L, new AccountService.CreateAccount("x", "x@y.test", "password", "Superuser")));
     }
+
+    @Test void administratorCanSetOnlyTheAccountPassword() {
+        User admin = user("Admin");
+        User doctor = new User();
+        doctor.setId(2L);
+        doctor.setUsername("doctor.one");
+        doctor.setEmail("doctor@example.test");
+        doctor.setRole("Doctor");
+        doctor.setPassword(AccountPasswords.encode("old-password"));
+        when(users.findById(1L)).thenReturn(Optional.of(admin));
+        when(users.findById(2L)).thenReturn(Optional.of(doctor));
+        when(users.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        new AccountService(users).resetPassword(1L, 2L, "new-secure-password");
+
+        assertTrue(AccountPasswords.matches("new-secure-password", doctor.getPassword()));
+        assertEquals("doctor.one", doctor.getUsername());
+        assertEquals("doctor@example.test", doctor.getEmail());
+        assertEquals("Doctor", doctor.getRole());
+        verify(users).save(doctor);
+    }
 }

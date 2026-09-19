@@ -1,5 +1,7 @@
 import '../../src/main/resources/static/js/form-validation.js';
 import '../../src/main/resources/static/css/form-validation.css';
+import '../../src/main/resources/static/js/submission-feedback.js';
+import '../../src/main/resources/static/css/submission-feedback.css';
 import { createRoot } from 'react-dom/client';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './api';

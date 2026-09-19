@@ -38,6 +38,23 @@ class SecurityControlsTest {
         for (String role : new String[]{"Patient", "Superuser", "ADMIN", ""}) assertFalse(ApiPermissions.allows(role, "/api/patients", "GET"));
         assertFalse(ApiPermissions.allows("Doctor", "/api/admin/accounts", "POST"));
         assertFalse(ApiPermissions.allows("Doctor", "/api/billing/invoices/1/payments", "POST"));
+        assertTrue(ApiPermissions.allows("Doctor", "/api/pharmacy/medicines", "GET"));
+        assertTrue(ApiPermissions.allows("Doctor", "/api/pharmacy/batches", "GET"));
+        assertTrue(ApiPermissions.allows("Doctor", "/api/pharmacy/prescriptions", "GET"));
+        assertTrue(ApiPermissions.allows("Doctor", "/api/pharmacy/prescriptions", "POST"));
+        assertTrue(ApiPermissions.allows("Doctor", "/api/pharmacy/prescription-items", "POST"));
+        assertTrue(ApiPermissions.allows("Doctor", "/api/pharmacy/prescriptions/12/finalize", "POST"));
+        assertFalse(ApiPermissions.allows("Doctor", "/api/pharmacy/transactions", "GET"));
+        assertFalse(ApiPermissions.allows("Doctor", "/api/pharmacy/medicines", "POST"));
+        assertFalse(ApiPermissions.allows("Doctor", "/api/pharmacy/dispensed-items", "GET"));
+        assertFalse(ApiPermissions.allows("Doctor", "/api/lab/orders", "GET"));
+        assertTrue(ApiPermissions.allows("Doctor", "/api/lab/tests", "GET"));
+        assertFalse(ApiPermissions.allows("Doctor", "/api/lab/tests", "POST"));
+        assertTrue(ApiPermissions.allows("Doctor", "/api/lab/reports/12/pdf", "GET"));
+        assertFalse(ApiPermissions.allows("Doctor", "/api/lab/reports/12/pdf", "POST"));
+        assertFalse(ApiPermissions.allows("Doctor", "/api/lab/reports", "GET"));
+        assertFalse(ApiPermissions.allows("Doctor", "/api/beds/summary", "GET"));
+        assertFalse(ApiPermissions.allows("Doctor", "/api/admissions", "GET"));
         assertFalse(ApiPermissions.allows("Receptionist", "/api/patients/1/medical-history", "GET"));
         assertFalse(ApiPermissions.allows("Pharmacist", "/api/pharmacy/prescriptions", "POST"));
         assertFalse(ApiPermissions.allows("Nurse", "/api/staff/1", "DELETE"));
@@ -45,6 +62,8 @@ class SecurityControlsTest {
         assertTrue(ApiPermissions.allows("Doctor", "/api/visits/1/notes", "PUT"));
         assertTrue(ApiPermissions.allows("Receptionist", "/api/billing/invoices/1/payments", "POST"));
         assertTrue(ApiPermissions.allows("Pharmacist", "/api/pharmacy/dispense", "POST"));
+        assertTrue(ApiPermissions.allows("Lab Technician", "/api/lab/orders", "GET"));
+        assertTrue(ApiPermissions.allows("Receptionist", "/api/beds/summary", "GET"));
         assertTrue(ApiPermissions.allows("Admin", "/api/admin/accounts", "DELETE"));
     }
     @Test void crossSiteFormCannotMutateWithoutCustomHeader() throws Exception {
@@ -58,6 +77,17 @@ class SecurityControlsTest {
         assertEquals("nosniff", accepted.getHeader("X-Content-Type-Options"));
         assertEquals("DENY", accepted.getHeader("X-Frame-Options"));
         assertTrue(accepted.getHeader("Content-Security-Policy").contains("frame-ancestors 'none'"));
+    }
+    @Test void clinicalPdfCanBePreviewedOnlyBySameOriginFrames() throws Exception {
+        var filter = new BrowserSecurityFilter();
+        var request = new MockHttpServletRequest("GET", "/api/lab/reports/52/pdf");
+        request.setServletPath("/api/lab/reports/52/pdf");
+        var response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, new MockFilterChain());
+
+        assertEquals("SAMEORIGIN", response.getHeader("X-Frame-Options"));
+        assertTrue(response.getHeader("Content-Security-Policy").contains("frame-ancestors 'self'"));
     }
     @Test void rateLimitExpiresAndDoesNotTrustClientForwardedHeaders() {
         var limiter = new LoginRateLimitFilter();

@@ -18,11 +18,9 @@ import com.hospital.app.repository.lab.LabOrderRepository;
 import com.hospital.app.repository.lab.LabReportRepository;
 import com.hospital.app.repository.lab.LabTestMasterRepository;
 import com.hospital.app.service.notification.NotificationService;
+import com.hospital.app.service.document.CareFlowPdfStyle;
 import com.lowagie.text.Document;
-import com.lowagie.text.Element;
-import com.lowagie.text.Font;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.PageSize;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +29,6 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class LabService {
@@ -127,11 +124,27 @@ public class LabService {
         return labOrderRepository.save(order);
     }
 
-    public LabReport addReport(LabReport report) {
+    public LabReport addReport(LabReport report, String performedBy) {
         LabReport saved = labReportRepository.save(report);
+        Visit reportVisit = visitRepository.findById(report.getVisitId()).orElse(null);
+        Appointment reportAppointment = reportVisit == null ? null
+            : appointmentRepository.findById(reportVisit.getAppointmentId()).orElse(null);
+        Patient reportPatient = reportVisit == null ? null
+            : patientRepository.findById(reportVisit.getPatientId()).orElse(null);
+        Staff reportDoctor = reportAppointment == null ? null
+            : staffRepository.findById(reportAppointment.getStaffId()).orElse(null);
         String subject = "Lab Report Ready";
-        String body = "Lab report uploaded for visit V" + String.format("%03d", report.getVisitId()) + ".";
-        notificationService.notifyByRole("Doctor", "LAB_REPORT_READY", subject, body);
+        String body = "Patient: " + (reportPatient == null ? "Patient ID " + (reportVisit == null ? "-" : reportVisit.getPatientId())
+                : reportPatient.getName() + " (P" + String.format("%03d", reportPatient.getId()) + ")")
+            + "\nVisit ID: V" + String.format("%03d", report.getVisitId())
+            + "\nAppointment ID: " + (reportAppointment == null ? "-" : "A" + String.format("%03d", reportAppointment.getId()))
+            + "\nReport: " + safeText(report.getFileName())
+                + "\nLab work completed/uploaded by: " + (performedBy == null || performedBy.isBlank() ? "Lab team" : performedBy)
+            + "\nOrdered/assigned doctor: " + (reportDoctor == null ? "-" : reportDoctor.getName());
+        if (reportDoctor != null) {
+            notificationService.notifyRecipientByRole("Doctor", "LAB_REPORT_READY",
+                reportDoctor.getEmail(), subject, body);
+        }
         notificationService.notifyByRole("Lab", "LAB_REPORT_READY", subject, body);
         return saved;
     }
@@ -181,60 +194,50 @@ public class LabService {
         }
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        Document document = new Document();
-        PdfWriter.getInstance(document, outputStream);
+        Document document = new Document(PageSize.A4.rotate(), 38, 38, 44, 54);
+        PdfWriter writer = PdfWriter.getInstance(document, outputStream);
+        CareFlowPdfStyle.apply(writer, "Laboratory report");
         document.open();
 
-        Font titleFont = new Font(Font.HELVETICA, 16, Font.BOLD);
-        Font headerFont = new Font(Font.HELVETICA, 11, Font.BOLD);
+        document.add(CareFlowPdfStyle.brandHeader("Laboratory report", safeText(report.getFileName()), "Final result"));
+        document.add(CareFlowPdfStyle.title("Clinical results"));
 
-        Paragraph title = new Paragraph("Medical Lab Report", titleFont);
-        title.setAlignment(Element.ALIGN_CENTER);
-        document.add(title);
-        document.add(new Paragraph(" "));
-
-        document.add(new Paragraph("Report: " + safeText(report.getFileName())));
-        document.add(new Paragraph("Visit: V" + String.format("%03d", visit.getId())));
-        document.add(new Paragraph("Appointment: A" + String.format("%03d", appointment.getId())));
-        document.add(new Paragraph(" "));
-
-        if (patient != null) {
-            document.add(new Paragraph("Patient: " + safeText(patient.getName())));
-            document.add(new Paragraph("Email: " + safeText(patient.getEmail())));
-            document.add(new Paragraph("Phone: " + safeText(patient.getPhone())));
-        }
-        if (doctor != null) {
-            document.add(new Paragraph("Doctor: " + safeText(doctor.getName()) + " (" + safeText(doctor.getDepartment()) + ")"));
-        }
-        document.add(new Paragraph(" "));
+        PdfPTable details = new PdfPTable(3);
+        details.setWidthPercentage(100);
+        details.addCell(CareFlowPdfStyle.labelValueCell("Patient", patient == null ? "" : patient.getName()));
+        details.addCell(CareFlowPdfStyle.labelValueCell("Doctor", doctor == null ? "" : doctor.getName()));
+        details.addCell(CareFlowPdfStyle.labelValueCell("Department", doctor == null ? "" : doctor.getDepartment()));
+        details.addCell(CareFlowPdfStyle.labelValueCell("Visit", "V" + String.format("%03d", visit.getId())));
+        details.addCell(CareFlowPdfStyle.labelValueCell("Appointment", "A" + String.format("%03d", appointment.getId())));
+        details.addCell(CareFlowPdfStyle.labelValueCell("Report ID", String.valueOf(report.getId())));
+        document.add(details);
+        document.add(CareFlowPdfStyle.section("Test results"));
 
         PdfPTable table = new PdfPTable(6);
         table.setWidthPercentage(100);
         table.setWidths(new float[]{1.0f, 3.2f, 1.3f, 1.4f, 1.1f, 2.0f});
 
-        addHeaderCell(table, "Test ID", headerFont);
-        addHeaderCell(table, "Test Name", headerFont);
-        addHeaderCell(table, "Result", headerFont);
-        addHeaderCell(table, "Reference", headerFont);
-        addHeaderCell(table, "Status", headerFont);
-        addHeaderCell(table, "Notes", headerFont);
+        table.addCell(CareFlowPdfStyle.headerCell("Test ID"));
+        table.addCell(CareFlowPdfStyle.headerCell("Test name"));
+        table.addCell(CareFlowPdfStyle.headerCell("Result"));
+        table.addCell(CareFlowPdfStyle.headerCell("Reference"));
+        table.addCell(CareFlowPdfStyle.headerCell("Status"));
+        table.addCell(CareFlowPdfStyle.headerCell("Notes"));
 
         for (LabOrderItem item : items) {
-            table.addCell(String.valueOf(item.getTestId()));
+            table.addCell(CareFlowPdfStyle.dataCell(String.valueOf(item.getTestId())));
             LabTestMaster test = labTestMasterRepository.findById(item.getTestId()).orElse(null);
-            table.addCell(safeText(test != null ? test.getTestName() : "Test"));
+            table.addCell(CareFlowPdfStyle.dataCell(safeText(test != null ? test.getTestName() : "Test")));
             String resultValue = item.getResultValue() == null ? "" : item.getResultValue();
             String resultUnit = item.getResultUnit() == null ? "" : item.getResultUnit();
             String resultCombined = (resultValue + " " + resultUnit).trim();
-            table.addCell(safeText(resultCombined));
-            table.addCell(safeText(item.getReferenceRange()));
-            table.addCell(safeText(item.getResultFlag() != null ? item.getResultFlag() : item.getStatus()));
-            table.addCell(safeText(item.getResultNotes()));
+            table.addCell(CareFlowPdfStyle.dataCell(safeText(resultCombined)));
+            table.addCell(CareFlowPdfStyle.dataCell(safeText(item.getReferenceRange())));
+            table.addCell(CareFlowPdfStyle.dataCell(safeText(item.getResultFlag() != null ? item.getResultFlag() : item.getStatus())));
+            table.addCell(CareFlowPdfStyle.dataCell(safeText(item.getResultNotes())));
         }
 
         document.add(table);
-        document.add(new Paragraph(" "));
-        document.add(new Paragraph("Notes: " + safeText(report.getMimeType())));
 
         document.close();
         return outputStream.toByteArray();
@@ -265,12 +268,6 @@ public class LabService {
         if (items.isEmpty()) text.append("\nNo test results recorded.\n");
         text.append("\nPlease contact your doctor to discuss these results.");
         return text.toString();
-    }
-
-    private void addHeaderCell(PdfPTable table, String text, Font font) {
-        PdfPCell cell = new PdfPCell(new com.lowagie.text.Phrase(text, font));
-        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        table.addCell(cell);
     }
 
     private String safeText(String value) {

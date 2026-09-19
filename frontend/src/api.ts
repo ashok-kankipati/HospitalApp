@@ -5,7 +5,7 @@ export interface Patient { id: number; name: string; email: string; phone: strin
 export interface Appointment { id: number; patientId: number; staffId: number; appointmentDate: string; appointmentTime: string; reason: string; status: string }
 export interface Staff { id: number; name: string; role: string; position?: string; department?: string; isActive?: boolean }
 export interface Beds { total: number; available: number; occupied: number; icu: number; general: number; private: number }
-export interface Notice { id: number; eventType?: string; subject: string; role: string; isRead: boolean }
+export interface Notice { id: number; eventType?: string; subject: string; details?: string; role: string; status: string; failureReason?: string; isRead: boolean; createdAt?: string }
 export const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: true } } });
 
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
@@ -21,7 +21,7 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
 export const usePatients = () => useQuery({ queryKey: ['patients'], queryFn: () => api<Patient[]>('/patients') });
 export const useAppointments = () => useQuery({ queryKey: ['appointments'], queryFn: () => api<Appointment[]>('/appointments') });
 export const useStaff = () => useQuery({ queryKey: ['staff'], queryFn: () => api<Staff[]>('/staff') });
-export const useBeds = () => useQuery({ queryKey: ['beds'], queryFn: () => api<Beds>('/beds/summary') });
+export const useBeds = (enabled = true) => useQuery({ queryKey: ['beds'], queryFn: () => api<Beds>('/beds/summary'), enabled });
 export function today() { const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`; }
 export function initials(name: string) { return name.split(/[ _]+/).filter(Boolean).slice(0, 2).map(n => n[0]).join('').toUpperCase(); }
 

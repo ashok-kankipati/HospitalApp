@@ -34,6 +34,11 @@ public class NotificationQueue {
     @com.fasterxml.jackson.annotation.JsonIgnore
     private String body;
 
+    @com.fasterxml.jackson.annotation.JsonProperty("details")
+    public String getDetails() {
+        return body;
+    }
+
     @Column(nullable = false)
     private String status;
 
@@ -49,6 +54,11 @@ public class NotificationQueue {
     @Column(name = "error_message")
     @com.fasterxml.jackson.annotation.JsonIgnore
     private String errorMessage;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("failureReason")
+    public String getFailureReason() {
+        return "FAILED".equals(status) ? errorMessage : null;
+    }
 
     @PrePersist
     protected void onCreate() {
