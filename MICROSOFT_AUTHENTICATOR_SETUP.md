@@ -41,6 +41,10 @@ One test phone can enroll multiple CareFlow accounts, but each account must scan
 
 An administrator can open **Staff accounts** and use **Reset authenticator** for the affected account. The user will receive a new QR code after their next successful password sign-in.
 
+## Forgotten password or username
+
+The administrator can see each username in **Staff accounts**. To reset a forgotten password, use the **Set password** key action for that account and enter the new password twice. This changes only the password; username, email, role, and Authenticator enrollment stay unchanged. Share the new password with the staff member through a secure channel.
+
 ## Security notes
 
 - Use HTTPS in production.

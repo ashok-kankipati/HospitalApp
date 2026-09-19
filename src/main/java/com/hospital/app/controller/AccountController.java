@@ -39,6 +39,10 @@ public class AccountController {
     @PutMapping("/{id}/role") public AccountService.Account changeRole(@PathVariable Long id, @Valid @RequestBody AccountService.ChangeRole body, HttpServletRequest request) {
         return accounts.changeRole(actorId(request), id, body.role());
     }
+    @PutMapping("/{id}/password") public ResponseEntity<Void> resetPassword(@PathVariable Long id, @Valid @RequestBody AccountService.ResetPassword body, HttpServletRequest request) {
+        accounts.resetPassword(actorId(request), id, body.password());
+        return ResponseEntity.noContent().build();
+    }
     @DeleteMapping("/{id}") public ResponseEntity<Void> delete(@PathVariable Long id, HttpServletRequest request) {
         accounts.delete(actorId(request), id);
         return ResponseEntity.noContent().build();
