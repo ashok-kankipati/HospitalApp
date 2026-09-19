@@ -15,7 +15,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     @org.springframework.beans.factory.annotation.Autowired
     private com.hospital.app.repository.UserRepository users;
     private static final org.slf4j.Logger audit = org.slf4j.LoggerFactory.getLogger("security.audit");
-    private static final Set<String> PUBLIC = Set.of("/api/auth/login", "/api/auth/duo/callback", "/api/auth/session", "/api/auth/logout", "/api/auth/health");
+    private static final Set<String> PUBLIC = Set.of("/api/auth/login", "/api/auth/duo/callback", "/api/auth/totp/verify", "/api/auth/session", "/api/auth/logout", "/api/auth/health");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)

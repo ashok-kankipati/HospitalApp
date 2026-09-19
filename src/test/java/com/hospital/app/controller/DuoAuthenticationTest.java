@@ -6,6 +6,7 @@ import com.hospital.app.dto.LoginResponse;
 import com.hospital.app.model.User;
 import com.hospital.app.service.DuoService;
 import com.hospital.app.service.UserService;
+import com.hospital.app.service.TotpService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.*;
@@ -19,14 +20,17 @@ class DuoAuthenticationTest {
     LoginController controller;
     DuoService duo;
     UserService users;
+    TotpService totp;
     MockHttpServletRequest request;
 
     @BeforeEach void setup() throws Exception {
         controller = new LoginController();
         duo = mock(DuoService.class);
         users = mock(UserService.class);
+        totp = mock(TotpService.class);
         ReflectionTestUtils.setField(controller, "duo", duo);
         ReflectionTestUtils.setField(controller, "userService", users);
+        ReflectionTestUtils.setField(controller, "totp", totp);
         request = new MockHttpServletRequest();
         when(duo.isEnabled()).thenReturn(true);
         when(duo.state()).thenReturn("random-state");

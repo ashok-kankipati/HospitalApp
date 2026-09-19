@@ -1,8 +1,7 @@
 package com.hospital.app.controller;
 
-import com.hospital.app.dto.LoginResponse;
 import com.hospital.app.service.AccountService;
-import com.hospital.app.service.UserService;
+import com.hospital.app.service.TotpService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -17,11 +16,11 @@ import java.util.Map;
 @RequestMapping("/api/admin/accounts")
 public class AccountController {
     private final AccountService accounts;
-    private final UserService users;
+    private final TotpService totp;
 
-    public AccountController(AccountService accounts, UserService users) {
+    public AccountController(AccountService accounts, TotpService totp) {
         this.accounts = accounts;
-        this.users = users;
+        this.totp = totp;
     }
 
     static Long actorId(HttpServletRequest request) {
@@ -42,6 +41,11 @@ public class AccountController {
     }
     @DeleteMapping("/{id}") public ResponseEntity<Void> delete(@PathVariable Long id, HttpServletRequest request) {
         accounts.delete(actorId(request), id);
+        return ResponseEntity.noContent().build();
+    }
+    @DeleteMapping("/{id}/totp") public ResponseEntity<Void> resetTotp(@PathVariable Long id, HttpServletRequest request) {
+        accounts.list(actorId(request));
+        totp.reset(id);
         return ResponseEntity.noContent().build();
     }
     @ExceptionHandler(ResponseStatusException.class)
