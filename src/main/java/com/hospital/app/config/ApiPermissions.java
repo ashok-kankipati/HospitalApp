@@ -38,7 +38,8 @@ public final class ApiPermissions {
             if (path.startsWith("/api/pharmacy/prescriptions") || path.startsWith("/api/pharmacy/prescription-items")) return role.equals("Surgeon");
             return role.equals("Pharmacist");
         }
-        if (path.equals("/api/lab/tests") && role.equals("Doctor")) return read;
+        if (role.equals("Doctor") && (path.equals("/api/lab/tests")
+            || path.matches("/api/lab/reports/[0-9]+/pdf"))) return read;
         if (path.startsWith("/api/lab/")) return read ? operationalClinical || in(role, "Lab Technician", "Radiologist") : in(role, "Lab Technician", "Radiologist");
         if (path.startsWith("/api/billing/")) return role.equals("Receptionist");
         if (path.equals("/api/beds/summary")) return read && (operationalClinical || role.equals("Receptionist"));

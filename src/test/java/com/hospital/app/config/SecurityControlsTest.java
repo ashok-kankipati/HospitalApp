@@ -50,6 +50,9 @@ class SecurityControlsTest {
         assertFalse(ApiPermissions.allows("Doctor", "/api/lab/orders", "GET"));
         assertTrue(ApiPermissions.allows("Doctor", "/api/lab/tests", "GET"));
         assertFalse(ApiPermissions.allows("Doctor", "/api/lab/tests", "POST"));
+        assertTrue(ApiPermissions.allows("Doctor", "/api/lab/reports/12/pdf", "GET"));
+        assertFalse(ApiPermissions.allows("Doctor", "/api/lab/reports/12/pdf", "POST"));
+        assertFalse(ApiPermissions.allows("Doctor", "/api/lab/reports", "GET"));
         assertFalse(ApiPermissions.allows("Doctor", "/api/beds/summary", "GET"));
         assertFalse(ApiPermissions.allows("Doctor", "/api/admissions", "GET"));
         assertFalse(ApiPermissions.allows("Receptionist", "/api/patients/1/medical-history", "GET"));
