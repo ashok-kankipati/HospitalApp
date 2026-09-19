@@ -128,7 +128,11 @@ public class LabService {
         LabReport saved = labReportRepository.save(report);
         String subject = "Lab Report Ready";
         String body = "Lab report uploaded for visit V" + String.format("%03d", report.getVisitId()) + ".";
-        notificationService.notifyByRole("Doctor", "LAB_REPORT_READY", subject, body);
+        visitRepository.findById(report.getVisitId())
+            .flatMap(visit -> appointmentRepository.findById(visit.getAppointmentId()))
+            .flatMap(appointment -> staffRepository.findById(appointment.getStaffId()))
+            .ifPresent(doctor -> notificationService.notifyRecipientByRole("Doctor", "LAB_REPORT_READY",
+                doctor.getEmail(), subject, body));
         notificationService.notifyByRole("Lab", "LAB_REPORT_READY", subject, body);
         return saved;
     }

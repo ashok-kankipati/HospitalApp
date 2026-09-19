@@ -26,10 +26,19 @@ public final class ApiPermissions {
         if (path.equals("/api/dispense") || path.startsWith("/api/dispense/"))
             return read ? operationalClinical || role.equals("Pharmacist") : role.equals("Pharmacist");
         if (path.startsWith("/api/pharmacy/")) {
+            if (role.equals("Doctor")) {
+                if (read) return path.equals("/api/pharmacy/medicines")
+                        || path.equals("/api/pharmacy/batches")
+                        || path.equals("/api/pharmacy/prescriptions");
+                return method.equals("POST") && (path.equals("/api/pharmacy/prescriptions")
+                        || path.equals("/api/pharmacy/prescription-items")
+                        || path.matches("/api/pharmacy/prescriptions/[0-9]+/finalize"));
+            }
             if (read) return operationalClinical || role.equals("Pharmacist");
             if (path.startsWith("/api/pharmacy/prescriptions") || path.startsWith("/api/pharmacy/prescription-items")) return role.equals("Surgeon");
             return role.equals("Pharmacist");
         }
+        if (path.equals("/api/lab/tests") && role.equals("Doctor")) return read;
         if (path.startsWith("/api/lab/")) return read ? operationalClinical || in(role, "Lab Technician", "Radiologist") : in(role, "Lab Technician", "Radiologist");
         if (path.startsWith("/api/billing/")) return role.equals("Receptionist");
         if (path.equals("/api/beds/summary")) return read && (operationalClinical || role.equals("Receptionist"));

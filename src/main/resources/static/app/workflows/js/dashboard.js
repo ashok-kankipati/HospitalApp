@@ -2923,7 +2923,10 @@ function loadLabData() {
 
 function loadLabTests() {
     return fetch('/api/lab/tests')
-        .then(response => response.ok ? response.json() : [])
+        .then(async response => {
+            if (!response.ok) throw new Error(await hospitalResponseError(response, 'Failed to load lab tests'));
+            return response.json();
+        })
         .then(tests => {
             labCache.tests = tests || [];
             renderConsultationLabTests();
