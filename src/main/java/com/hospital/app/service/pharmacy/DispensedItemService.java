@@ -25,8 +25,8 @@ public class DispensedItemService {
     }
 
     public DispensedItem saveDispensedItem(DispensedItem item) {
-        DispensedItem saved = dispensedItemRepository.save(item);
-        invoiceService.addOrUpdateDispensedItemInvoice(saved);
-        return saved;
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.CONFLICT,
+                "Use the prescription dispense workflow; direct dispense records bypass stock and billing validation.");
     }
 }

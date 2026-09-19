@@ -22,6 +22,8 @@ public final class ApiPermissions {
         if (path.startsWith("/api/patients/")) return clinical || (read && in(role, "Pharmacist", "Lab Technician", "Radiologist"));
         if (path.equals("/api/appointments") || path.startsWith("/api/appointments/")) return read || clinical || role.equals("Receptionist");
         if (path.equals("/api/visits") || path.startsWith("/api/visits/")) return clinical || (read && in(role, "Pharmacist", "Lab Technician", "Radiologist"));
+        if (path.equals("/api/dispense") || path.startsWith("/api/dispense/"))
+            return read ? clinical || role.equals("Pharmacist") : role.equals("Pharmacist");
         if (path.startsWith("/api/pharmacy/")) {
             if (read) return clinical || role.equals("Pharmacist");
             if (path.startsWith("/api/pharmacy/prescriptions") || path.startsWith("/api/pharmacy/prescription-items")) return in(role, "Doctor", "Surgeon");

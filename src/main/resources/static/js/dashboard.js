@@ -31,6 +31,7 @@ let currentDispensePrescription = null;
 let currentConsultationPrescriptionId = null;
 let currentInvoiceIdForPayment = null;
 let billingInitialized = false;
+let appointmentFilterState = { appointments: [], patientMap: {}, staffMap: {} };
 let labCache = {
     tests: [],
     orders: [],
@@ -70,6 +71,8 @@ window.initializeHospitalDashboard = async function () {
     setupLabSearch();
     setupBedTabs();
     setupBedForms();
+    setupAppointmentFilters();
+    setupTablePagination();
     setupNotificationSettings();
     setupNotificationBell();
     setupSidebarToggle();
@@ -736,11 +739,22 @@ function closeGenerateInvoiceModal() {
 
 function handleGenerateInvoice(event) {
     event.preventDefault();
-    const formData = new FormData(event.target);
+    const form = event.target;
+    if (form.dataset.submitting === 'true') return;
+    const formData = new FormData(form);
     const appointmentId = parseInt(formData.get('appointmentId'), 10);
     if (!appointmentId) {
         alert('Select an appointment to generate invoice.');
         return;
+    }
+
+    const submitButton = event.submitter || form.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton ? submitButton.textContent : '';
+    form.dataset.submitting = 'true';
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Processing...';
+        submitButton.setAttribute('aria-busy', 'true');
     }
 
     const payload = {
@@ -769,6 +783,14 @@ function handleGenerateInvoice(event) {
         .catch(error => {
             console.error('Error generating invoice:', error);
             alert('Error generating invoice: ' + error.message);
+        })
+        .finally(() => {
+            delete form.dataset.submitting;
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+                submitButton.removeAttribute('aria-busy');
+            }
         });
 }
 
@@ -1531,7 +1553,6 @@ function displayAppointments(appointments) {
         return;
     }
 
-    // Fetch patient and staff details for display
     Promise.all([
         fetch('/api/patients?includeInactive=true').then(r => r.json()),
         fetch('/api/staff').then(r => r.json())
@@ -1541,8 +1562,102 @@ function displayAppointments(appointments) {
         
         patients.forEach(p => patientMap[p.id] = p.name);
         staff.forEach(s => staffMap[s.id] = s.name);
+        appointmentFilterState = { appointments, patientMap, staffMap };
+        const doctorFilter = document.getElementById('appointmentFilterDoctor');
+        if (doctorFilter) {
+            const doctors = staff.filter(member => appointments.some(appt => appt.staffId === member.id));
+            doctorFilter.innerHTML = '<option value="">All doctors</option>' + doctors
+                .sort((left, right) => String(left.name || '').localeCompare(String(right.name || '')))
+                .map(member => `<option value="${member.id}">${member.name || 'Unnamed doctor'}</option>`).join('');
+        }
+        renderFilteredAppointments();
+    }).catch(error => {
+        console.error('Error loading related data:', error);
+        tableBody.innerHTML = CareflowHTML.sanitize('<tr><td colspan="7" style="text-align: center; color: red;">Failed to load appointment details</td></tr>');
+    });
+}
 
-        tableBody.innerHTML = CareflowHTML.sanitize(appointments.map(appt => `
+function setupAppointmentFilters() {
+    ['appointmentFilterDate', 'appointmentFilterDoctor', 'appointmentFilterStatus'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', renderFilteredAppointments);
+    });
+    document.getElementById('clearAppointmentFilters')?.addEventListener('click', () => {
+        ['appointmentFilterDate', 'appointmentFilterDoctor', 'appointmentFilterStatus'].forEach(id => {
+            const control = document.getElementById(id);
+            if (control) control.value = '';
+        });
+        renderFilteredAppointments();
+    });
+}
+
+const tablePaginationState = {};
+
+function setupTablePagination() {
+    ['appointmentsTable', 'medicineTable', 'batchTable', 'pharmacyPrescriptionTable', 'billingTable', 'labPendingTable', 'labInProgressTable', 'labCompletedTable']
+        .forEach(tableId => {
+            const table = document.getElementById(tableId);
+            const body = table?.querySelector('tbody');
+            if (!body) return;
+            new MutationObserver(() => paginateTable(tableId)).observe(body, { childList: true });
+            paginateTable(tableId);
+        });
+}
+
+function paginateTable(tableId) {
+    const table = document.getElementById(tableId);
+    const body = table?.querySelector('tbody');
+    if (!table || !body) return;
+    const rows = [...body.querySelectorAll('tr')];
+    const empty = rows.length === 0 || (rows.length === 1 && rows[0].querySelector('td[colspan]'));
+    let pager = table.parentElement?.querySelector(`[data-table-pager="${tableId}"]`);
+    if (empty) {
+        pager?.remove();
+        return;
+    }
+    const pageSize = 6;
+    const pageCount = Math.ceil(rows.length / pageSize);
+    const state = tablePaginationState[tableId] || { page: 0 };
+    state.page = Math.min(state.page, pageCount - 1);
+    tablePaginationState[tableId] = state;
+    rows.forEach((row, index) => {
+        row.hidden = index < state.page * pageSize || index >= (state.page + 1) * pageSize;
+    });
+    if (pageCount <= 1) {
+        pager?.remove();
+        return;
+    }
+    if (!pager) {
+        pager = document.createElement('div');
+        pager.className = 'cf-table-pager';
+        pager.dataset.tablePager = tableId;
+        table.parentElement?.appendChild(pager);
+    }
+    pager.innerHTML = `<button type="button" aria-label="Previous page" ${state.page === 0 ? 'disabled' : ''}>&lsaquo;</button><span>Page ${state.page + 1} of ${pageCount}</span><button type="button" aria-label="Next page" ${state.page === pageCount - 1 ? 'disabled' : ''}>&rsaquo;</button>`;
+    const buttons = pager.querySelectorAll('button');
+    buttons[0]?.addEventListener('click', () => { state.page -= 1; paginateTable(tableId); });
+    buttons[1]?.addEventListener('click', () => { state.page += 1; paginateTable(tableId); });
+}
+
+function renderFilteredAppointments() {
+    const tableBody = document.querySelector('#appointmentsSection .data-table tbody');
+    if (!tableBody) return;
+    const date = document.getElementById('appointmentFilterDate')?.value || '';
+    const doctorId = document.getElementById('appointmentFilterDoctor')?.value || '';
+    const status = document.getElementById('appointmentFilterStatus')?.value || '';
+    const filtered = appointmentFilterState.appointments.filter(appt =>
+        (!date || appt.appointmentDate === date)
+        && (!doctorId || String(appt.staffId) === doctorId)
+        && (!status || String(appt.status || '').toUpperCase() === status)
+    );
+
+    if (!filtered.length) {
+        tableBody.innerHTML = CareflowHTML.sanitize('<tr><td colspan="7" style="text-align: center;">No appointments match the selected filters</td></tr>');
+        return;
+    }
+
+    const patientMap = appointmentFilterState.patientMap;
+    const staffMap = appointmentFilterState.staffMap;
+    tableBody.innerHTML = CareflowHTML.sanitize(filtered.map(appt => `
             <tr>
                 <td>A${String(appt.id).padStart(3, '0')}</td>
                 <td>${patientMap[appt.patientId] || 'Unknown'}</td>
@@ -1560,10 +1675,6 @@ function displayAppointments(appointments) {
                 </td>
             </tr>
         `).join(''));
-    }).catch(error => {
-        console.error('Error loading related data:', error);
-        tableBody.innerHTML = CareflowHTML.sanitize('<tr><td colspan="7" style="text-align: center; color: red;">Failed to load appointment details</td></tr>');
-    });
 }
 
 /**
@@ -2643,7 +2754,10 @@ function loadVisitNotes(visitId) {
         });
 }
 
+let dispenseSubmissionInProgress = false;
+
 function openDispenseModal(prescriptionId) {
+    if (dispenseSubmissionInProgress) return;
     const prescription = pharmacyCache.prescriptions.find(presc => presc.id === prescriptionId);
     if (!prescription) return;
 
@@ -2678,8 +2792,8 @@ function openDispenseModal(prescriptionId) {
             return `
                 <div class="dispense-item">
                     <div class="dispense-label">${medicineName} (${batchLabel})</div>
-                    <div class="dispense-meta">Prescribed: ${item.quantity || 0} | Available: ${availableQty}</div>
-                    <input type="number" class="dispense-qty" min="0" max="${maxDispense}" value="${maxDispense}" data-item-id="${item.id}" data-batch-id="${batch.id}">
+                    <div class="dispense-meta">Prescribed: ${item.quantity || 0} | Already dispensed: ${existingDispensed} | Remaining: ${remaining} | Available: ${availableQty}</div>
+                    <input type="number" class="dispense-qty" min="0" max="${maxDispense}" value="${maxDispense}" data-item-id="${item.id}" data-batch-id="${batch.id}" data-dispensed-qty="${existingDispensed}">
                 </div>
             `;
         }).join(''));
@@ -2712,6 +2826,7 @@ function closeDispenseModal() {
 }
 
 function confirmDispense() {
+    if (dispenseSubmissionInProgress) return;
     const container = document.getElementById('dispenseItemsContainer');
     if (!container || !currentDispensePrescription) return;
 
@@ -2728,6 +2843,7 @@ function confirmDispense() {
         dispenseItemsPayload.push({
             prescriptionItemId: itemId,
             medicineBatchId: batchId,
+            expectedDispensedQuantity: Number(input.dataset.dispensedQty),
             quantity: qty
         });
     }
@@ -2737,9 +2853,12 @@ function confirmDispense() {
         return;
     }
 
+    dispenseSubmissionInProgress = true;
+    const dispenseButtons = document.querySelectorAll('#dispenseModal button');
+    dispenseButtons.forEach(button => button.disabled = true);
     fetch('/api/dispense', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'Careflow' },
                 body: JSON.stringify({
                     prescriptionId: currentDispensePrescription.id,
                     dispensedBy: currentUser && currentUser.id ? currentUser.id : 1,
@@ -2763,6 +2882,10 @@ function confirmDispense() {
         .catch(error => {
             console.error('Error dispensing items:', error);
             alert(error.message || 'Error dispensing items.');
+        })
+        .finally(() => {
+            dispenseSubmissionInProgress = false;
+            dispenseButtons.forEach(button => button.disabled = false);
         });
 }
 

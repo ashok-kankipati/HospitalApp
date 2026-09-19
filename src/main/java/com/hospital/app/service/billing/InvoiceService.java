@@ -145,8 +145,9 @@ public class InvoiceService {
         return details;
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public Invoice generateInvoice(InvoiceGenerateRequest request) {
-        Appointment appointment = appointmentRepository.findById(request.getAppointmentId()).orElseThrow();
+        Appointment appointment = appointmentRepository.findForBilling(request.getAppointmentId()).orElseThrow();
         Long patientId = appointment.getPatientId();
 
         List<InvoiceItem> items = new ArrayList<>();
@@ -282,6 +283,7 @@ public class InvoiceService {
         return recordPayment(invoice, payment);
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public void addOrUpdateDispensedItemInvoice(com.hospital.app.model.pharmacy.DispensedItem dispensedItem) {
         if (dispensedItem == null || dispensedItem.getPrescriptionItem() == null) {
             return;
@@ -297,7 +299,7 @@ public class InvoiceService {
             return;
         }
 
-        Appointment appointment = appointmentRepository.findById(prescription.getAppointmentId()).orElse(null);
+        Appointment appointment = appointmentRepository.findForBilling(prescription.getAppointmentId()).orElse(null);
         if (appointment == null) {
             return;
         }
@@ -363,6 +365,7 @@ public class InvoiceService {
         recalculateInvoiceTotals(invoice);
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public Map<String, Object> backfillInvoicesFromDispensedItems() {
         List<DispensedItem> dispensedItems = dispensedItemRepository.findAll();
         int created = 0;
@@ -626,9 +629,10 @@ public class InvoiceService {
         }
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public Long generateInvoiceFromVisit(Long visitId) {
         Visit visit = visitRepository.findById(visitId).orElseThrow();
-        Appointment appointment = appointmentRepository.findById(visit.getAppointmentId()).orElseThrow();
+        Appointment appointment = appointmentRepository.findForBilling(visit.getAppointmentId()).orElseThrow();
 
         Invoice invoice = invoiceRepository.findByAppointmentId(appointment.getId())
                 .stream()

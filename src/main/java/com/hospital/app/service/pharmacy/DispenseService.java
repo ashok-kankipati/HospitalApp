@@ -51,11 +51,18 @@ public class DispenseService {
     @Autowired
     private InvoiceService invoiceService;
 
+    @Autowired
+    private com.hospital.app.repository.pharmacy.PrescriptionRepository prescriptionRepository;
+
     @Transactional
     public Dispense createDispense(DispenseCreateRequest request) {
         if (request.getPrescriptionId() == null || request.getItems() == null || request.getItems().isEmpty()) {
             throw new IllegalArgumentException("A prescription and at least one dispense item are required.");
         }
+
+        // Serialize requests before reading the dispense ledger, including stale browser retries.
+        prescriptionRepository.findForDispensing(request.getPrescriptionId())
+                .orElseThrow(() -> new IllegalArgumentException("Prescription not found."));
 
         List<PrescriptionItem> prescriptionItems = prescriptionItemRepository.findByPrescriptionId(request.getPrescriptionId());
         Map<Long, PrescriptionItem> prescriptionItemMap = prescriptionItems.stream()
@@ -86,6 +93,10 @@ public class DispenseService {
                             && itemRequest.getPrescriptionItemId().equals(item.getPrescriptionItem().getId()))
                     .mapToInt(item -> item.getQuantity() == null ? 0 : item.getQuantity())
                     .sum();
+            if (itemRequest.getExpectedDispensedQuantity() == null
+                    || itemRequest.getExpectedDispensedQuantity() != alreadyDispensed) {
+                throw new IllegalArgumentException("Dispensing history changed. Refresh the prescription before dispensing again.");
+            }
             if (alreadyDispensed + requestedByPrescriptionItem.get(itemRequest.getPrescriptionItemId()) > prescriptionItem.getQuantity()) {
                 throw new IllegalArgumentException("Dispense quantity exceeds the remaining prescription quantity.");
             }
