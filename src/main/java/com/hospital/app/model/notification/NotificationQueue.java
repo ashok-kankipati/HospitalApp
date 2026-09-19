@@ -34,6 +34,11 @@ public class NotificationQueue {
     @com.fasterxml.jackson.annotation.JsonIgnore
     private String body;
 
+    @com.fasterxml.jackson.annotation.JsonProperty("details")
+    public String getDetails() {
+        return body;
+    }
+
     @Column(nullable = false)
     private String status;
 

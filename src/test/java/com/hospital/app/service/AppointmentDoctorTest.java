@@ -3,6 +3,7 @@ package com.hospital.app.service;
 import com.hospital.app.model.Appointment;
 import com.hospital.app.model.Staff;
 import com.hospital.app.repository.AppointmentRepository;
+import com.hospital.app.repository.PatientRepository;
 import com.hospital.app.repository.StaffRepository;
 import com.hospital.app.service.notification.NotificationService;
 import org.junit.jupiter.api.Test;
@@ -38,9 +39,11 @@ class AppointmentDoctorTest {
         var service = new AppointmentService();
         var staff = mock(StaffRepository.class);
         var appointments = mock(AppointmentRepository.class);
+        var patients = mock(PatientRepository.class);
         var notifications = mock(NotificationService.class);
         ReflectionTestUtils.setField(service, "staffRepository", staff);
         ReflectionTestUtils.setField(service, "appointmentRepository", appointments);
+        ReflectionTestUtils.setField(service, "patientRepository", patients);
         ReflectionTestUtils.setField(service, "notificationService", notifications);
 
         var doctor = new Staff();
@@ -51,8 +54,14 @@ class AppointmentDoctorTest {
 
         var appointment = new Appointment();
         appointment.setStaffId(7L);
+        appointment.setPatientId(3L);
         appointment.setAppointmentDate("2026-09-20");
         appointment.setAppointmentTime("10:00 AM");
+        appointment.setReason("Follow-up");
+        var patient = new com.hospital.app.model.Patient();
+        patient.setId(3L);
+        patient.setName("Sivakumar");
+        when(patients.findById(3L)).thenReturn(Optional.of(patient));
         when(appointments.save(appointment)).thenAnswer(call -> {
             appointment.setId(42L);
             return appointment;
@@ -61,7 +70,9 @@ class AppointmentDoctorTest {
         service.addAppointment(appointment);
 
         verify(notifications).notifyRecipientByRole(eq("Doctor"), eq("APPOINTMENT_REMINDER"),
-                eq("assigned.doctor@hospital.com"), anyString(), contains("A042"));
+            eq("assigned.doctor@hospital.com"), anyString(), argThat(body -> body.contains("A042")
+                && body.contains("Sivakumar (P003)") && body.contains("2026-09-20")
+                && body.contains("10:00 AM") && body.contains("Follow-up")));
         verify(notifications, never()).notifyByRole(eq("Doctor"), anyString(), anyString(), anyString());
         verify(notifications).notifyByRole(eq("Receptionist"), eq("APPOINTMENT_REMINDER"), anyString(), anyString());
     }

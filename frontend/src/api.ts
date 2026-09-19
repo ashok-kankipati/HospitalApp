@@ -5,7 +5,7 @@ export interface Patient { id: number; name: string; email: string; phone: strin
 export interface Appointment { id: number; patientId: number; staffId: number; appointmentDate: string; appointmentTime: string; reason: string; status: string }
 export interface Staff { id: number; name: string; role: string; position?: string; department?: string; isActive?: boolean }
 export interface Beds { total: number; available: number; occupied: number; icu: number; general: number; private: number }
-export interface Notice { id: number; eventType?: string; subject: string; role: string; status: string; failureReason?: string; isRead: boolean }
+export interface Notice { id: number; eventType?: string; subject: string; details?: string; role: string; status: string; failureReason?: string; isRead: boolean; createdAt?: string }
 export const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: true } } });
 
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {

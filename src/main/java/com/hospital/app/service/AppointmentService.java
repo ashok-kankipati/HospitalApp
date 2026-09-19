@@ -2,6 +2,7 @@ package com.hospital.app.service;
 
 import com.hospital.app.model.Appointment;
 import com.hospital.app.repository.AppointmentRepository;
+import com.hospital.app.repository.PatientRepository;
 import com.hospital.app.service.notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,9 @@ public class AppointmentService {
 
     @Autowired
     private com.hospital.app.repository.StaffRepository staffRepository;
+
+    @Autowired
+    private PatientRepository patientRepository;
 
     private com.hospital.app.model.Staff requireDoctor(Long staffId) {
         var doctor = staffId == null ? null : staffRepository.findById(staffId).orElse(null);
@@ -36,9 +40,14 @@ public class AppointmentService {
     public Appointment addAppointment(Appointment appointment) {
         var doctor = requireDoctor(appointment.getStaffId());
         Appointment saved = appointmentRepository.save(appointment);
+        var patient = patientRepository.findById(saved.getPatientId()).orElse(null);
         String subject = "Appointment Reminder";
-        String body = "New appointment scheduled: A" + String.format("%03d", saved.getId())
-                + " on " + saved.getAppointmentDate() + " " + saved.getAppointmentTime();
+        String body = "Appointment ID: A" + String.format("%03d", saved.getId())
+            + "\nPatient: " + (patient == null ? "Patient ID " + saved.getPatientId() : patient.getName() + " (P" + String.format("%03d", patient.getId()) + ")")
+            + "\nDoctor: " + doctor.getName()
+            + "\nDate: " + saved.getAppointmentDate()
+            + "\nTime: " + saved.getAppointmentTime()
+            + "\nReason: " + (saved.getReason() == null || saved.getReason().isBlank() ? "Not specified" : saved.getReason());
         notificationService.notifyRecipientByRole("Doctor", "APPOINTMENT_REMINDER", doctor.getEmail(), subject, body);
         notificationService.notifyByRole("Receptionist", "APPOINTMENT_REMINDER", subject, body);
         return saved;

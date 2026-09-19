@@ -124,15 +124,27 @@ public class LabService {
         return labOrderRepository.save(order);
     }
 
-    public LabReport addReport(LabReport report) {
+    public LabReport addReport(LabReport report, String performedBy) {
         LabReport saved = labReportRepository.save(report);
+        Visit reportVisit = visitRepository.findById(report.getVisitId()).orElse(null);
+        Appointment reportAppointment = reportVisit == null ? null
+            : appointmentRepository.findById(reportVisit.getAppointmentId()).orElse(null);
+        Patient reportPatient = reportVisit == null ? null
+            : patientRepository.findById(reportVisit.getPatientId()).orElse(null);
+        Staff reportDoctor = reportAppointment == null ? null
+            : staffRepository.findById(reportAppointment.getStaffId()).orElse(null);
         String subject = "Lab Report Ready";
-        String body = "Lab report uploaded for visit V" + String.format("%03d", report.getVisitId()) + ".";
-        visitRepository.findById(report.getVisitId())
-            .flatMap(visit -> appointmentRepository.findById(visit.getAppointmentId()))
-            .flatMap(appointment -> staffRepository.findById(appointment.getStaffId()))
-            .ifPresent(doctor -> notificationService.notifyRecipientByRole("Doctor", "LAB_REPORT_READY",
-                doctor.getEmail(), subject, body));
+        String body = "Patient: " + (reportPatient == null ? "Patient ID " + (reportVisit == null ? "-" : reportVisit.getPatientId())
+                : reportPatient.getName() + " (P" + String.format("%03d", reportPatient.getId()) + ")")
+            + "\nVisit ID: V" + String.format("%03d", report.getVisitId())
+            + "\nAppointment ID: " + (reportAppointment == null ? "-" : "A" + String.format("%03d", reportAppointment.getId()))
+            + "\nReport: " + safeText(report.getFileName())
+                + "\nLab work completed/uploaded by: " + (performedBy == null || performedBy.isBlank() ? "Lab team" : performedBy)
+            + "\nOrdered/assigned doctor: " + (reportDoctor == null ? "-" : reportDoctor.getName());
+        if (reportDoctor != null) {
+            notificationService.notifyRecipientByRole("Doctor", "LAB_REPORT_READY",
+                reportDoctor.getEmail(), subject, body);
+        }
         notificationService.notifyByRole("Lab", "LAB_REPORT_READY", subject, body);
         return saved;
     }
