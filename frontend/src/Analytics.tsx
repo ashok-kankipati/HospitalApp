@@ -43,9 +43,10 @@ function Card({ title, subtitle, queries, allowed = true, children }: { title: s
 }
 export default function Analytics({ user }: { user: User }) {
   const [period, setPeriod] = useState(30);
-  const appointments = useAppointments(); const staff = useStaff(); const beds = useBeds();
+  const bedsAllowed = ['Admin', 'Surgeon', 'Nurse', 'Receptionist'].includes(user.role);
+  const appointments = useAppointments(); const staff = useStaff(); const beds = useBeds(bedsAllowed);
   const billingAllowed = ['Admin', 'Receptionist'].includes(user.role);
-  const pharmacyAllowed = ['Admin', 'Doctor', 'Surgeon', 'Nurse', 'Pharmacist'].includes(user.role);
+  const pharmacyAllowed = ['Admin', 'Surgeon', 'Nurse', 'Pharmacist'].includes(user.role);
   const visitsAllowed = user.role !== 'Receptionist';
   const visits = useQuery({ queryKey: ['analytics-visits'], queryFn: () => api<Visit[]>('/visits'), enabled: visitsAllowed });
   const payments = useQuery({ queryKey: ['analytics-payments'], queryFn: () => api<Payment[]>('/billing/invoices/payments'), enabled: billingAllowed });
@@ -77,7 +78,7 @@ export default function Analytics({ user }: { user: User }) {
     <Card title="Department-wise patients" subtitle="Distinct visiting patients per doctor's current department" queries={[visits, staff]} allowed={visitsAllowed}><Bars points={[...departments].map(([label, patients]) => ({ label, value: patients.size }))} /></Card>
     <Card title="Payment methods" subtitle="Share of collected amount · INR" queries={[payments]} allowed={billingAllowed}><Donut currency points={[...methods].map(([label, value]) => ({ label, value }))} /></Card>
     <Card title="Doctor workload" subtitle="Appointments per doctor · excludes cancellations and no-shows" queries={[appointments, staff]}><Bars points={workload} /></Card>
-    <Card title="Bed occupancy" subtitle="Current occupied beds / total beds" queries={[beds]}>{beds.data?.total ? <div className="ca-occupancy"><strong>{occupancy.toFixed(1)}%</strong><progress aria-label="Bed occupancy" value={occupancy} max={100} /><p>{beds.data.occupied} occupied of {beds.data.total} beds · {beds.data.available} available</p></div> : <Empty title="No beds configured">Add beds to track occupancy.</Empty>}</Card>
+    <Card title="Bed occupancy" subtitle="Current occupied beds / total beds" queries={[beds]} allowed={bedsAllowed}>{beds.data?.total ? <div className="ca-occupancy"><strong>{occupancy.toFixed(1)}%</strong><progress aria-label="Bed occupancy" value={occupancy} max={100} /><p>{beds.data.occupied} occupied of {beds.data.total} beds · {beds.data.available} available</p></div> : <Empty title="No beds configured">Add beds to track occupancy.</Empty>}</Card>
     <Card title="Pharmacy stock alerts" subtitle="Active batches · stock ≤10 or expiry within 30 days" queries={[batches, transactions]} allowed={pharmacyAllowed}>{alerts.length ? <div className="cf-table-scroll ca-stock"><table className="cf-table"><thead><tr><th>Medicine / batch</th><th>Stock</th><th>Expiry</th><th>Alert</th></tr></thead><tbody>{alerts.map(b => <tr key={b.id}><td>{b.medicine?.name || 'Unknown medicine'}<small>{b.batchNo}</small></td><td>{b.quantity}</td><td>{b.expiryDate || 'Unknown'}</td><td>{b.reasons.join(' · ')}</td></tr>)}</tbody></table></div> : <Empty title="No stock alerts">Active batches have no low-stock or expiry alerts.</Empty>}</Card>
   </div></section>;
 }

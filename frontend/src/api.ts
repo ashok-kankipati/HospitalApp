@@ -21,7 +21,7 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
 export const usePatients = () => useQuery({ queryKey: ['patients'], queryFn: () => api<Patient[]>('/patients') });
 export const useAppointments = () => useQuery({ queryKey: ['appointments'], queryFn: () => api<Appointment[]>('/appointments') });
 export const useStaff = () => useQuery({ queryKey: ['staff'], queryFn: () => api<Staff[]>('/staff') });
-export const useBeds = () => useQuery({ queryKey: ['beds'], queryFn: () => api<Beds>('/beds/summary') });
+export const useBeds = (enabled = true) => useQuery({ queryKey: ['beds'], queryFn: () => api<Beds>('/beds/summary'), enabled });
 export function today() { const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`; }
 export function initials(name: string) { return name.split(/[ _]+/).filter(Boolean).slice(0, 2).map(n => n[0]).join('').toUpperCase(); }
 

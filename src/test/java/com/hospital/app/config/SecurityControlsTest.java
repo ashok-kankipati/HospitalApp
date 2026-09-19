@@ -78,6 +78,17 @@ class SecurityControlsTest {
         assertEquals("DENY", accepted.getHeader("X-Frame-Options"));
         assertTrue(accepted.getHeader("Content-Security-Policy").contains("frame-ancestors 'none'"));
     }
+    @Test void clinicalPdfCanBePreviewedOnlyBySameOriginFrames() throws Exception {
+        var filter = new BrowserSecurityFilter();
+        var request = new MockHttpServletRequest("GET", "/api/lab/reports/52/pdf");
+        request.setServletPath("/api/lab/reports/52/pdf");
+        var response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, new MockFilterChain());
+
+        assertEquals("SAMEORIGIN", response.getHeader("X-Frame-Options"));
+        assertTrue(response.getHeader("Content-Security-Policy").contains("frame-ancestors 'self'"));
+    }
     @Test void rateLimitExpiresAndDoesNotTrustClientForwardedHeaders() {
         var limiter = new LoginRateLimitFilter();
         for (int i=0; i<30; i++) assertTrue(limiter.allow("127.0.0.1", 1));
