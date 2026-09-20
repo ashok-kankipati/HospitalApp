@@ -2185,7 +2185,7 @@ function loadPharmacyPrescriptions() {
         fetch('/api/pharmacy/prescription-items').then(r => r.ok ? r.json() : []),
         fetch('/api/pharmacy/dispensed-items').then(r => r.ok ? r.json() : []),
         fetch('/api/appointments').then(r => r.ok ? r.json() : []),
-        fetch('/api/patients').then(r => r.ok ? r.json() : []),
+        fetch('/api/patients?includeInactive=true').then(r => r.ok ? r.json() : []),
         fetch('/api/staff').then(r => r.ok ? r.json() : [])
     ])
         .then(([prescriptions, items, dispensedItems, appointments, patients, staff]) => {
