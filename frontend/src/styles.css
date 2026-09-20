@@ -139,6 +139,7 @@ body { background: #f3f7f4; color: var(--cf-ink); }
 @media(max-width:1150px){.cf-page-heading,.cf-metrics,.cf-overview-grid,.ca-analytics,.cf-page-footer{max-width:none;margin-left:0;margin-right:0}}
 #legacy-workspace #pharmacySection #batchTable{min-width:820px}
 #legacy-workspace #pharmacySection #medicineTable td:nth-child(2),#legacy-workspace #pharmacySection #batchTable td:nth-child(2){font-weight:550;color:#304b3c;white-space:normal;overflow-wrap:anywhere}
+#legacy-workspace #pharmacySection #medicineTable td:nth-child(2),#legacy-workspace #pharmacySection #batchTable td:nth-child(2){font-weight:550;color:#304b3c;white-space:normal;overflow-wrap:anywhere}
 #legacy-workspace #pharmacySection #medicineTable td:nth-child(3){white-space:normal;overflow-wrap:anywhere;color:#7b877d}
 #legacy-workspace #pharmacySection .data-table td:nth-child(3){overflow-wrap:anywhere;white-space:normal}
 #legacy-workspace #pharmacySection .data-table tbody tr:hover{background:#f5f8f4}
@@ -147,3 +148,14 @@ body { background: #f3f7f4; color: var(--cf-ink); }
 #legacy-workspace #pharmacySection .pharmacy-entry summary small{display:none}
 #legacy-workspace #pharmacySection .pharmacy-entry summary{padding:10px 14px}
 #legacy-workspace #pharmacySection .pharmacy-entry-tools{gap:12px;margin-bottom:14px}
+
+/* Fixed workspace shell: branding and controls stay visible while operations scroll. */
+.cf-app { height: 100dvh; overflow: hidden; }
+.cf-sidebar { position: fixed; inset: 0 auto 0 0; display: flex; flex-direction: column; overflow: hidden; }
+.cf-sidebar nav { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.cf-sidebar-bottom { flex: 0 0 auto; }
+.cf-main-shell { height: 100dvh; margin-left: 240px; }
+.cf-topbar { position: fixed; top: 0; right: 0; left: 240px; z-index: 40; height: 80px; background: rgba(255,255,255,.98); border-bottom: 1px solid var(--cf-border); box-shadow: 0 4px 16px #203c2c0b; }
+.cf-main { height: 100dvh; min-height: 0; padding-top: 80px; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
+@media(max-width:1150px) and (min-width:761px){.cf-main-shell{margin-left:211px}.cf-topbar{left:211px}}
+@media(max-width:760px){.cf-app,.cf-main-shell{height:auto;min-height:100dvh;overflow:visible}.cf-sidebar{overflow-y:auto}.cf-sidebar nav{overflow:visible}.cf-topbar{position:fixed;top:0;left:0;height:65px}.cf-main{height:auto;min-height:100dvh;padding-top:65px;overflow:visible}}
