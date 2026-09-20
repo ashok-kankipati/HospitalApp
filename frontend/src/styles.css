@@ -10,6 +10,7 @@
 .cf-bell.cf-bell-has-count::after { content: attr(data-count); position: absolute; top: -5px; right: -7px; min-width: 17px; height: 17px; padding: 0 4px; display: grid; place-items: center; border: 2px solid #fff; border-radius: 10px; background: #c83f36; color: #fff; font-size: 9px; font-weight: 800; line-height: 1; }
 .cf-auth-security-page { display: block; background: #f4f8f6; padding: 40px 20px; }
 .cf-auth-security-page .cf-auth-form-panel { width: min(100%, 560px); min-height: calc(100dvh - 80px); margin: auto; border: 1px solid var(--cf-border); border-radius: 8px; background: #fff; }
+.cf-auth-security { display: none; }
 .cf-totp-qr { display: block; width: 240px; height: 240px; margin: 24px auto; border: 1px solid var(--cf-border); border-radius: 6px; }
 .cf-manual-key { display: grid; gap: 7px; margin-bottom: 20px; padding: 13px; border-radius: 6px; background: #f2f6f5; text-align: center; }
 .cf-manual-key span { color: #71827e; font-size: 11px; }
@@ -45,12 +46,6 @@
 @media(max-width:420px){.cf-page-heading{flex-wrap:wrap}.cf-page-heading>.cf-button{margin-top:0}.cf-metric-title{font-size:10px}.cf-metric-caption{font-size:9px}.cf-metric{padding:14px}.cf-icon-tile{width:30px;height:30px}.cf-form-grid{grid-template-columns:1fr}.cf-span-two{grid-column:span 1}.cf-dialog{padding:20px}.cf-panel-footer{padding:13px;gap:8px}.cf-chart{gap:10px}.cf-chart-total .cf-chart-legend{font-size:8px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 
-/* Keep the sign-in experience focused when the promotional panel is hidden. */
-.cf-auth { display: flex; align-items: center; justify-content: center; padding: 32px 20px; }
-.cf-auth-story { display: none; }
-.cf-auth-form-panel { width: min(100%, 560px); min-height: 0; border: 1px solid var(--cf-border); border-radius: 8px; background: #fff; }
-.cf-auth-security { display: none; }
-@media(max-width:760px){.cf-auth{display:flex;min-height:100dvh;padding:20px}.cf-auth-form-panel{min-height:0;padding:40px 25px 45px}.cf-auth-mobile-brand{position:static;margin-bottom:40px}}
 
 #legacy-workspace button.close{background:none;border:0;padding:4px 8px;line-height:1;}
 /* Pharmacy: inventory first, compact entry panels and scannable stock rows. */
