@@ -59,17 +59,6 @@
 
 #legacy-workspace button.close{background:none;border:0;padding:4px 8px;line-height:1;}
 
-/* Keep workspace chrome fixed while the active work area scrolls like an operations console. */
-.cf-app { min-height: 100dvh; height: 100dvh; overflow: hidden; }
-.cf-sidebar { position: fixed; inset: 0 auto 0 0; z-index: 60; }
-.cf-main-shell { height: 100dvh; margin-left: 240px; }
-.cf-topbar { position: fixed; top: 0; right: 0; left: 240px; z-index: 70; height: 80px; background: rgba(255,255,255,.98); border-bottom: 1px solid var(--cf-border); box-shadow: 0 5px 18px #203c2c0b; backdrop-filter: blur(12px); }
-.cf-main { position: relative; z-index: 1; height: 100dvh; min-height: 0; padding-top: 80px; overflow-y: auto; overflow-x: hidden; scroll-padding-top: 80px; overscroll-behavior: contain; }
-.ca-primary-grid { margin-bottom: 20px; }
-.ca-secondary-grid { padding-top: 20px; border-top: 1px solid var(--cf-border); }
-.ca-secondary-grid .ca-card { min-height: 280px; }
-@media(max-width:1150px) and (min-width:761px){.cf-main-shell{margin-left:211px}.cf-topbar{left:211px}.cf-main{scroll-padding-top:80px}}
-@media(max-width:760px){.cf-app,.cf-main-shell{height:auto;min-height:100dvh;overflow:visible}.cf-topbar{position:fixed;top:0;left:0;height:65px}.cf-main{height:auto;min-height:100dvh;padding-top:65px;overflow:visible;scroll-padding-top:65px}.ca-secondary-grid{padding-top:14px}.ca-secondary-grid .ca-card{min-height:0}}
 /* Pharmacy: inventory first, compact entry panels and scannable stock rows. */
 #legacy-workspace #pharmacySection .pharmacy-tabs{margin-bottom:18px;gap:4px;width:fit-content;padding:4px;background:#edf2ed;border:1px solid #e0e7df;border-radius:8px}
 #legacy-workspace #pharmacySection .pharmacy-tab{padding:8px 14px;font-size:12px;line-height:18px;border:0;border-radius:5px}
@@ -112,6 +101,42 @@
 #legacy-workspace #pharmacy-inventory{max-width:1080px}
 #legacy-workspace #pharmacySection #medicineTable,#legacy-workspace #pharmacySection #batchTable{table-layout:fixed;width:100%}
 #legacy-workspace #pharmacySection #medicineTable{min-width:620px}
+
+/* Current workspace visual system: quiet clinical contrast, stronger hierarchy, faster scanning. */
+:root { --cf-green: #116b59; --cf-ink: #173b34; --cf-muted: #71817b; --cf-border: #dfe9e3; --cf-surface: #ffffff; --cf-wash: #f3f7f4; }
+body { background: #f3f7f4; color: var(--cf-ink); }
+.cf-main { background: #f3f7f4; }
+.cf-topbar { background: rgba(255,255,255,.98); border-bottom-color: #e0e9e3; }
+.cf-breadcrumb strong { color: #173b34; font-size: 13px; }
+.cf-page-heading { max-width: 1320px; margin: 0 auto 24px; padding: 8px 0 0; }
+.cf-page-heading h1 { color: #173b34; font-weight: 650; letter-spacing: -1px; }
+.cf-eyebrow { color: #2d806c; font-weight: 750; letter-spacing: 1.8px; }
+.cf-description { color: #71817b; }
+.cf-metrics { max-width: 1320px; margin: 0 auto 26px; gap: 14px; }
+.cf-metric { min-height: 158px; padding: 20px; border: 1px solid #dfe9e3; border-radius: 14px; background: #fff; box-shadow: 0 8px 22px #173b3408; text-align: left; }
+.cf-metric:hover:not(:disabled) { border-color: #9bc8b8; box-shadow: 0 12px 28px #173b3414; transform: translateY(-2px); }
+.cf-metric-top { margin-bottom: 22px; }
+.cf-metric-title { color: #61736c; font-weight: 600; }
+.cf-metric strong { color: #173b34; font-size: 34px; font-weight: 650; letter-spacing: -1px; }
+.cf-metric-caption { color: #87958f; }
+.cf-icon-tile.cf-green { background: #e2f2eb; color: #13725d; }
+.cf-icon-tile.cf-blue { background: #e7f0fa; color: #3a71a1; }
+.cf-icon-tile.cf-purple { background: #eeeaf8; color: #745ca0; }
+.cf-icon-tile.cf-orange { background: #fbefe0; color: #b16b2a; }
+.cf-overview-grid { max-width: 1320px; margin: 0 auto; gap: 18px; }
+.cf-panel, .cf-care-note { border-color: #dfe9e3; box-shadow: 0 8px 24px #173b3408; }
+.cf-panel-heading { border-bottom-color: #edf2ee; }
+.cf-panel-heading h2 { color: #21483e; font-weight: 650; }
+.cf-table th { color: #7b8b84; background: #f8fbf9; }
+.cf-table td { color: #526b62; }
+.cf-shortcut { border-color: #e0e9e3; background: #fff; }
+.cf-shortcut:hover:not(:disabled) { border-color: #9bc8b8; background: #f8fcfa; }
+.ca-analytics { max-width: 1320px; margin: 34px auto 0; }
+.ca-heading { padding: 0 0 16px; }
+.ca-heading h2 { color: #173b34; font-weight: 650; letter-spacing: -.5px; }
+.ca-card { border-color: #dfe9e3; box-shadow: 0 8px 24px #173b3408; }
+.cf-page-footer { max-width: 1320px; margin: 30px auto 0; color: #87958f; }
+@media(max-width:1150px){.cf-page-heading,.cf-metrics,.cf-overview-grid,.ca-analytics,.cf-page-footer{max-width:none;margin-left:0;margin-right:0}}
 #legacy-workspace #pharmacySection #batchTable{min-width:820px}
 #legacy-workspace #pharmacySection #medicineTable td:nth-child(2),#legacy-workspace #pharmacySection #batchTable td:nth-child(2){font-weight:550;color:#304b3c;white-space:normal;overflow-wrap:anywhere}
 #legacy-workspace #pharmacySection #medicineTable td:nth-child(3){white-space:normal;overflow-wrap:anywhere;color:#7b877d}

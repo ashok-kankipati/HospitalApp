@@ -71,11 +71,11 @@ export default function Analytics({ user }: { user: User }) {
     return { ...b, quantity, reasons };
   }).filter(b => b.reasons.length).sort((a, b) => a.quantity - b.quantity);
   const occupancy = beds.data?.total ? Math.min(100, Math.max(0, beds.data.occupied / beds.data.total * 100)) : 0;
-  return <section className="ca-analytics" aria-label="Hospital analytics"><div className="ca-heading"><div><h2>Hospital analytics</h2><p>{days[0]} to {end} · Bed and stock figures show current state.</p></div><label>Reporting period<select value={period} onChange={e => setPeriod(Number(e.target.value))}><option value={7}>Last 7 days</option><option value={30}>Last 30 days</option><option value={90}>Last 90 days</option></select></label></div><div className="ca-grid ca-primary-grid">
+  return <section className="ca-analytics" aria-label="Hospital analytics"><div className="ca-heading"><div><h2>Hospital analytics</h2><p>{days[0]} to {end} · Bed and stock figures show current state.</p></div><label>Reporting period<select value={period} onChange={e => setPeriod(Number(e.target.value))}><option value={7}>Last 7 days</option><option value={30}>Last 30 days</option><option value={90}>Last 90 days</option></select></label></div><div className="ca-grid">
     <Card title="Patient visits trend" subtitle="Recorded visits by creation date" queries={[visits]} allowed={visitsAllowed}><Line points={daily(day => selectedVisits.filter(v => v.createdAt.slice(0, 10) === day).length)} /></Card>
     <Card title="Revenue trend" subtitle="Collected payments by payment date · INR" queries={[payments]} allowed={billingAllowed}><Line currency points={daily(day => selectedPayments.filter(p => p.paidAt.slice(0, 10) === day).reduce((sum, p) => sum + Number(p.amount), 0))} /></Card>
     <Card title="Appointments by status" subtitle="Appointments scheduled in the selected period" queries={[appointments]}><Donut points={group(selectedAppointments.map(a => a.status))} /></Card>
-  </div><div className="ca-grid ca-secondary-grid">
+  
     <Card title="Department-wise patients" subtitle="Distinct visiting patients per doctor's current department" queries={[visits, staff]} allowed={visitsAllowed}><Bars points={[...departments].map(([label, patients]) => ({ label, value: patients.size }))} /></Card>
     <Card title="Payment methods" subtitle="Share of collected amount · INR" queries={[payments]} allowed={billingAllowed}><Donut currency points={[...methods].map(([label, value]) => ({ label, value }))} /></Card>
     <Card title="Doctor workload" subtitle="Appointments per doctor · excludes cancellations and no-shows" queries={[appointments, staff]}><Bars points={workload} /></Card>
