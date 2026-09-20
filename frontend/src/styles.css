@@ -158,10 +158,12 @@ body { background: #f3f7f4; color: var(--cf-ink); }
 .cf-topbar { position: fixed; top: 0; right: 0; left: 240px; z-index: 40; height: 80px; background: rgba(255,255,255,.98); border-bottom: 1px solid var(--cf-border); box-shadow: 0 4px 16px #203c2c0b; }
 .cf-main { position: fixed; top: 80px; right: 0; bottom: 0; left: 240px; height: auto; min-height: 0; padding: 35px 40px 22px; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
 .ca-primary-grid { margin-bottom: 18px; }
-.ca-details-toggle { display: flex; align-items: center; gap: 8px; margin: 0 auto 22px; padding: 10px 16px; border: 1px solid #dfe9e3; border-radius: 8px; background: #fff; color: #176b56; font-size: 12px; font-weight: 650; box-shadow: 0 4px 14px #173b3408; }
+.ca-heading-actions { display: flex; align-items: flex-end; gap: 12px; }
+.ca-details-toggle { display: inline-flex; align-items: center; gap: 7px; padding: 9px 13px; border: 1px solid #dfe9e3; border-radius: 8px; background: #fff; color: #176b56; font-size: 11px; font-weight: 650; white-space: nowrap; box-shadow: 0 4px 14px #173b3408; }
 .ca-details-toggle:hover { border-color: #9bc8b8; background: #f8fcfa; }
 .ca-details-toggle svg { transition: transform .2s ease; }
 .ca-details-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
-.ca-secondary-grid { padding-top: 20px; border-top: 1px solid var(--cf-border); }
+.ca-secondary-grid { padding-top: 18px; border-top: 1px solid var(--cf-border); }
+@media(max-width:640px){.ca-heading-actions{align-items:stretch;flex-direction:column;gap:8px}.ca-details-toggle{justify-content:center}.ca-heading label{width:100%}}
 @media(max-width:1150px) and (min-width:761px){.cf-main-shell{margin-left:211px}.cf-topbar{left:211px}.cf-main{left:211px;padding-left:25px;padding-right:25px}}
 @media(max-width:760px){.cf-app,.cf-main-shell{height:auto;min-height:100dvh;overflow:visible}.cf-sidebar{overflow-y:auto}.cf-sidebar nav{overflow:visible}.cf-topbar{position:fixed;top:0;left:0;height:65px}.cf-main{position:static;height:auto;min-height:100dvh;padding:90px 18px 20px;overflow:visible}}
