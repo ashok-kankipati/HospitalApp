@@ -156,6 +156,6 @@ body { background: #f3f7f4; color: var(--cf-ink); }
 .cf-sidebar-bottom { flex: 0 0 auto; }
 .cf-main-shell { height: 100dvh; margin-left: 240px; }
 .cf-topbar { position: fixed; top: 0; right: 0; left: 240px; z-index: 40; height: 80px; background: rgba(255,255,255,.98); border-bottom: 1px solid var(--cf-border); box-shadow: 0 4px 16px #203c2c0b; }
-.cf-main { height: 100dvh; min-height: 0; padding-top: 80px; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
-@media(max-width:1150px) and (min-width:761px){.cf-main-shell{margin-left:211px}.cf-topbar{left:211px}}
-@media(max-width:760px){.cf-app,.cf-main-shell{height:auto;min-height:100dvh;overflow:visible}.cf-sidebar{overflow-y:auto}.cf-sidebar nav{overflow:visible}.cf-topbar{position:fixed;top:0;left:0;height:65px}.cf-main{height:auto;min-height:100dvh;padding-top:65px;overflow:visible}}
+.cf-main { position: fixed; top: 80px; right: 0; bottom: 0; left: 240px; height: auto; min-height: 0; padding: 35px 40px 22px; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
+@media(max-width:1150px) and (min-width:761px){.cf-main-shell{margin-left:211px}.cf-topbar{left:211px}.cf-main{left:211px;padding-left:25px;padding-right:25px}}
+@media(max-width:760px){.cf-app,.cf-main-shell{height:auto;min-height:100dvh;overflow:visible}.cf-sidebar{overflow-y:auto}.cf-sidebar nav{overflow:visible}.cf-topbar{position:fixed;top:0;left:0;height:65px}.cf-main{position:static;height:auto;min-height:100dvh;padding:90px 18px 20px;overflow:visible}}
