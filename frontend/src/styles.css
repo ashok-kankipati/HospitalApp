@@ -8,14 +8,24 @@
 .cf-notice-unread { background: #f8fcfa; }
 .cf-bell { position: relative; }
 .cf-bell.cf-bell-has-count::after { content: attr(data-count); position: absolute; top: -5px; right: -7px; min-width: 17px; height: 17px; padding: 0 4px; display: grid; place-items: center; border: 2px solid #fff; border-radius: 10px; background: #c83f36; color: #fff; font-size: 9px; font-weight: 800; line-height: 1; }
-.cf-auth-security-page { display: block; background: #f4f8f6; padding: 40px 20px; }
-.cf-auth-security-page .cf-auth-form-panel { width: min(100%, 560px); min-height: calc(100dvh - 80px); margin: auto; border: 1px solid var(--cf-border); border-radius: 8px; background: #fff; }
+.cf-auth-security-page { display: flex; align-items: center; justify-content: center; min-height: 100dvh; background: radial-gradient(circle at 50% 0%, #e8f3ec 0, #f4f8f6 42%, #eef3f0 100%); padding: 32px 20px; }
+.cf-auth-security-page .cf-auth-form-panel { width: min(100%, 560px); min-height: 0; margin: auto; border: 1px solid #dce8df; border-radius: 18px; background: #fff; box-shadow: 0 22px 70px #183d2b18; }
 .cf-auth-security { display: none; }
+.cf-auth-security-page .cf-auth-form-wrap { max-width: 410px; padding: 48px 0; margin: auto; }
+.cf-auth-security-page .cf-auth-form-wrap h2 { font-size: 31px; letter-spacing: -1px; }
+.cf-auth-security-page .cf-description { max-width: 370px; margin-top: 10px; }
+.cf-microsoft-mark { display: grid; grid-template-columns: repeat(2, 15px); gap: 3px; width: 39px; height: 39px; padding: 3px; margin-bottom: 22px; border-radius: 10px; background: #f2f7f2; box-shadow: inset 0 0 0 1px #dce8df; }
+.cf-microsoft-mark span { display: block; }
+.cf-microsoft-mark span:nth-child(1) { background: #f25022; }
+.cf-microsoft-mark span:nth-child(2) { background: #7fba00; }
+.cf-microsoft-mark span:nth-child(3) { background: #00a4ef; }
+.cf-microsoft-mark span:nth-child(4) { background: #ffb900; }
 .cf-totp-qr { display: block; width: 240px; height: 240px; margin: 24px auto; border: 1px solid var(--cf-border); border-radius: 6px; }
 .cf-manual-key { display: grid; gap: 7px; margin-bottom: 20px; padding: 13px; border-radius: 6px; background: #f2f6f5; text-align: center; }
 .cf-manual-key span { color: #71827e; font-size: 11px; }
 .cf-manual-key code { overflow-wrap: anywhere; color: #17312b; font-size: 13px; letter-spacing: 0; }
 .cf-recovery-codes { margin: 22px 0 14px; padding: 18px; border: 1px solid var(--cf-border); border-radius: 6px; background: #f2f6f5; color: #17312b; font: 600 14px/1.8 monospace; text-align: center; }
+@media(max-width:640px){.cf-auth-security-page{padding:18px 14px}.cf-auth-security-page .cf-auth-form-panel{border-radius:14px}.cf-auth-security-page .cf-auth-form-wrap{padding:34px 22px}.cf-auth-security-page .cf-auth-form-wrap h2{font-size:27px}.cf-totp-qr{width:min(240px,75vw);height:auto}}
 .cf-dialog:has(.cf-pdf-preview) { width: min(94vw, 1100px); max-width: 1100px; padding-bottom: 18px; }
 .cf-pdf-toolbar { min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 0; color: #526a64; font-size: 13px; }
 .cf-pdf-toolbar > span, .cf-pdf-toolbar > div, .cf-pdf-download { display: flex; align-items: center; gap: 8px; }
