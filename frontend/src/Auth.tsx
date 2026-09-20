@@ -6,7 +6,7 @@ import { Brand, ErrorState, Spinner } from './ui';
 export default function Auth({ onLogin, duoFailed }: { onLogin: (user: User) => void; duoFailed: boolean }) {
   const [visible, setVisible] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(duoFailed ? 'Duo verification failed or expired. Please sign in again.' : '');
+  const [error, setError] = useState(duoFailed ? 'Verification failed or expired. Please sign in again.' : '');
   const [challenge, setChallenge] = useState<{ enrollmentRequired: boolean; qrCode?: string; manualKey?: string }>();
   const [recoveryCodes, setRecoveryCodes] = useState<string[]>();
   const [verifiedUser, setVerifiedUser] = useState<User>();

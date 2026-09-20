@@ -45,6 +45,13 @@
 @media(max-width:420px){.cf-page-heading{flex-wrap:wrap}.cf-page-heading>.cf-button{margin-top:0}.cf-metric-title{font-size:10px}.cf-metric-caption{font-size:9px}.cf-metric{padding:14px}.cf-icon-tile{width:30px;height:30px}.cf-form-grid{grid-template-columns:1fr}.cf-span-two{grid-column:span 1}.cf-dialog{padding:20px}.cf-panel-footer{padding:13px;gap:8px}.cf-chart{gap:10px}.cf-chart-total .cf-chart-legend{font-size:8px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 
+/* Keep the sign-in experience focused when the promotional panel is hidden. */
+.cf-auth { display: flex; align-items: center; justify-content: center; padding: 32px 20px; }
+.cf-auth-story { display: none; }
+.cf-auth-form-panel { width: min(100%, 560px); min-height: 0; border: 1px solid var(--cf-border); border-radius: 8px; background: #fff; }
+.cf-auth-security { display: none; }
+@media(max-width:760px){.cf-auth{display:flex;min-height:100dvh;padding:20px}.cf-auth-form-panel{min-height:0;padding:40px 25px 45px}.cf-auth-mobile-brand{position:static;margin-bottom:40px}}
+
 #legacy-workspace button.close{background:none;border:0;padding:4px 8px;line-height:1;}
 /* Pharmacy: inventory first, compact entry panels and scannable stock rows. */
 #legacy-workspace #pharmacySection .pharmacy-tabs{margin-bottom:18px;gap:4px;width:fit-content;padding:4px;background:#edf2ed;border:1px solid #e0e7df;border-radius:8px}
