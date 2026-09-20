@@ -2911,12 +2911,13 @@ function isPrescriptionDispensed(prescriptionId) {
 }
 
 function loadLabData() {
-    Promise.all([
-        loadLabTests(),
-        loadLabOrders('PENDING'),
-        loadLabOrders('IN_PROGRESS'),
-        loadLabOrders('COMPLETED')
-    ]).catch(error => {
+    loadLabTests()
+        .then(() => Promise.all([
+            loadLabOrders('PENDING'),
+            loadLabOrders('IN_PROGRESS'),
+            loadLabOrders('COMPLETED')
+        ]))
+        .catch(error => {
         console.error('Error loading lab data:', error);
     });
 }
