@@ -2292,8 +2292,8 @@ function renderPharmacyPrescriptions() {
 
     tableBody.innerHTML = CareflowHTML.sanitize(filtered.map(presc => {
         const appt = appointmentMap[presc.appointmentId] || {};
-        const patientName = patientMap[appt.patientId] || 'Unknown';
-        const doctorName = staffMap[presc.doctorId] || 'Unknown';
+        const patientName = patientMap[appt.patientId] || `Deleted patient${appt.patientId ? ` (ID ${appt.patientId})` : ''}`;
+        const doctorName = staffMap[presc.doctorId] || `Deleted doctor${presc.doctorId ? ` (ID ${presc.doctorId})` : ''}`;
         const dateStr = presc.date ? new Date(presc.date).toLocaleString() : '-';
         const isDispensed = isPrescriptionDispensed(presc.id);
         const status = isDispensed ? 'DISPENSED' : (presc.status || 'CREATED');
