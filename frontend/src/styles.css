@@ -58,6 +58,16 @@
 
 
 #legacy-workspace button.close{background:none;border:0;padding:4px 8px;line-height:1;}
+
+/* Keep workspace chrome fixed while the active work area scrolls like an operations console. */
+.cf-app { min-height: 100dvh; height: 100dvh; overflow: hidden; }
+.cf-main-shell { height: 100dvh; display: flex; flex-direction: column; }
+.cf-topbar { position: sticky; top: 0; z-index: 40; flex: 0 0 80px; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--cf-border); backdrop-filter: blur(12px); }
+.cf-main { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+.ca-primary-grid { margin-bottom: 20px; }
+.ca-secondary-grid { padding-top: 20px; border-top: 1px solid var(--cf-border); }
+.ca-secondary-grid .ca-card { min-height: 280px; }
+@media(max-width:760px){.cf-app,.cf-main-shell{height:auto;min-height:100dvh;overflow:visible}.cf-topbar{position:sticky;top:0;flex-basis:65px}.cf-main{overflow:visible}.ca-secondary-grid{padding-top:14px}.ca-secondary-grid .ca-card{min-height:0}}
 /* Pharmacy: inventory first, compact entry panels and scannable stock rows. */
 #legacy-workspace #pharmacySection .pharmacy-tabs{margin-bottom:18px;gap:4px;width:fit-content;padding:4px;background:#edf2ed;border:1px solid #e0e7df;border-radius:8px}
 #legacy-workspace #pharmacySection .pharmacy-tab{padding:8px 14px;font-size:12px;line-height:18px;border:0;border-radius:5px}
